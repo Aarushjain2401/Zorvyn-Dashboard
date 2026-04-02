@@ -1,10 +1,10 @@
 @import "tailwindcss";
 
 :root {
-  --app-primary: #FFFFFF;
+  --app-primary: #EEF2F6;
   --app-surface: #F8FAFC;
-  --app-elevated: #F1F5F9;
-  --app-popover: #E2E8F0;
+  --app-elevated: #F8FAFC;
+  --app-popover: #F1F5F9;
   --app-border-subtle: #CBD5E1;
   --app-text-primary: #0F172A;
   --app-text-secondary: #475569;
@@ -30,10 +30,12 @@
   --color-text-primary: var(--app-text-primary);
   --color-text-secondary: var(--app-text-secondary);
 
-  --color-violet: #2563EB; 
-  --color-teal: #059669; 
-  --color-rose: #DC2626; 
-  --color-amber: #D97706; 
+  --color-brand: #6366F1;
+  --color-brand-light: rgba(99, 102, 241, 0.1);
+  --color-violet: #6366F1; 
+  --color-teal: #10B981; 
+  --color-rose: #F43F5E; 
+  --color-amber: #F59E0B; 
   
   --font-mono: 'Geist Mono', monospace;
   --font-sans: 'Geist', sans-serif;
@@ -90,7 +92,7 @@
   .glass-card {
     background: var(--color-elevated);
     border: 1px solid var(--color-border-subtle);
-    border-radius: 12px;
+    border-radius: 0;
     transition: all 0.2s ease-in-out;
   }
   
@@ -104,7 +106,7 @@
     -webkit-backdrop-filter: blur(16px);
     border: 1px solid color-mix(in srgb, var(--color-border-subtle) 50%, transparent);
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-    border-radius: 16px;
+    border-radius: 0;
     transition: all 0.3s ease-in-out;
   }
   
@@ -131,7 +133,7 @@
     left: -10%;
     width: 50vw;
     height: 50vw;
-    background: radial-gradient(circle, rgba(124,110,250,0.15) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 70%);
     border-radius: 50%;
     filter: blur(80px);
     animation: drift 20s ease-in-out infinite alternate;
@@ -142,7 +144,7 @@
     right: -10%;
     width: 60vw;
     height: 60vw;
-    background: radial-gradient(circle, rgba(0,212,170,0.1) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(16,185,129,0.1) 0%, transparent 70%);
     border-radius: 50%;
     filter: blur(100px);
     animation: drift 25s ease-in-out infinite alternate-reverse;

@@ -44,14 +44,19 @@ export const Topbar = () => {
         </div>
 
         {/* Bell */}
-        <div className="relative text-gray-400 hover:text-white cursor-pointer transition-colors flex items-center justify-center min-w-[44px] min-h-[44px]">
+        <div className="relative text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] cursor-pointer transition-colors flex items-center justify-center min-w-[44px] min-h-[44px]">
           <Bell className="w-5 h-5" />
-          <span className="absolute top-2 right-2 w-2 h-2 bg-[var(--color-rose)] rounded-full border border-[var(--color-surface)]"></span>
+          <span className="absolute top-2 right-2 w-2 h-2 bg-[var(--color-rose)] rounded-none border border-[var(--color-surface)]"></span>
+        </div>
+
+        {/* Profile */}
+        <div className="hidden md:flex items-center gap-3 border-l border-[var(--color-border-subtle)] pl-5 cursor-pointer hover:bg-[var(--color-popover)] p-1.5 rounded-none transition-colors">
+          <div className="w-8 h-8 rounded-none bg-[var(--color-violet)] text-white flex items-center justify-center font-bold text-sm">AJ</div>
         </div>
 
         {/* Add Transaction Button */}
         {role === 'Admin' && (
-          <button onClick={() => openModal()} className="flex items-center justify-center gap-1.5 bg-[var(--color-violet)] hover:bg-[#6A5AE6] transition-colors text-white text-xs font-semibold px-0 md:px-4 w-[44px] md:w-auto h-[44px] md:h-8 rounded-full md:rounded-md shadow-[0_4px_14px_rgba(124,110,250,0.3)]">
+          <button onClick={() => openModal()} className="flex items-center justify-center gap-1.5 bg-[var(--color-violet)] hover:bg-[#6A5AE6] transition-colors text-white text-xs font-semibold px-0 md:px-4 w-[44px] md:w-auto h-[44px] md:h-8 rounded-none shadow-[0_4px_14px_rgba(124,110,250,0.3)]">
             <Plus className="w-5 h-5 md:w-4 md:h-4" /> 
             <span className="hidden md:inline">Add</span>
           </button>
