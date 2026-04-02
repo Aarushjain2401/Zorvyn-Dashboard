@@ -60,30 +60,41 @@ export const Overview = () => {
           label: 'Cumulative Balance',
           data: balanceData,
           borderColor: '#7C6EFA',
-          borderWidth: 2,
-          tension: 0.4,
+          borderWidth: 3,
+          tension: 0.5,
           pointBackgroundColor: '#7C6EFA',
-          pointRadius: 3,
+          pointBorderColor: '#FFF',
+          pointBorderWidth: 2,
+          pointRadius: 0,
+          pointHoverRadius: 6,
+          fill: true,
+          backgroundColor: (context) => {
+            const ctx = context.chart.ctx;
+            const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(124, 110, 250, 0.4)');
+            gradient.addColorStop(1, 'rgba(124, 110, 250, 0.01)');
+            return gradient;
+          },
           yAxisID: 'y1',
         },
         {
           type: 'bar',
           label: 'Income',
           data: incomeData,
-          backgroundColor: 'rgba(0, 212, 170, 0.2)',
-          borderColor: '#00D4AA',
-          borderWidth: 1,
-          borderRadius: 4,
+          backgroundColor: 'rgba(0, 229, 181, 0.15)',
+          borderColor: '#00E5B5',
+          borderWidth: 1.5,
+          borderRadius: 6,
           yAxisID: 'y',
         },
         {
           type: 'bar',
           label: 'Expenses',
           data: expenseData,
-          backgroundColor: 'rgba(255, 78, 106, 0.2)',
-          borderColor: '#FF4E6A',
-          borderWidth: 1,
-          borderRadius: 4,
+          backgroundColor: 'rgba(255, 59, 92, 0.15)',
+          borderColor: '#FF3B5C',
+          borderWidth: 1.5,
+          borderRadius: 6,
           yAxisID: 'y',
         }
       ]
@@ -111,7 +122,8 @@ export const Overview = () => {
     scales: {
       x: { grid: { display: false } },
       y: { 
-        type: 'linear', display: true, position: 'left', grid: { color: '#1E2840' },
+        type: 'linear', display: true, position: 'left', grid: { color: 'rgba(148, 163, 184, 0.05)'},
+        border: { display: false },
         ticks: { callback: function(value) { return formatCurrency(value); } }
       },
       y1: { type: 'linear', display: false, position: 'right', grid: { drawOnChartArea: false } }, // Hide secondary axis labels

@@ -59,7 +59,7 @@ export const AppProvider = ({ children }) => {
   });
 
   const [theme, setTheme] = useState(() => {
-    return localStorage.getItem('zorvyn_theme') || 'system';
+    return localStorage.getItem('zorvyn_theme') || 'dark';
   });
 
   const [isModalOpen, setIsModalOpen] = useState(false);

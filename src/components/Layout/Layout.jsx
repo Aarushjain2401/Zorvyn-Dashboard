@@ -16,6 +16,12 @@ export const Layout = () => {
 
   return (
     <div className="flex h-screen bg-[var(--color-primary)] text-[var(--color-text-primary)] font-sans overflow-hidden">
+      {/* Ambient Mesh Background */}
+      <div className="mesh-bg">
+        <div className="mesh-blob-1"></div>
+        <div className="mesh-blob-2"></div>
+      </div>
+      
       <Sidebar />
       <Topbar />
       

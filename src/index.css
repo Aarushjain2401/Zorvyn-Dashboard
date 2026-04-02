@@ -11,13 +11,13 @@
 }
 
 :root[data-theme='dark'] {
-  --app-primary: #05070F; 
-  --app-surface: #0B0F1E;
-  --app-elevated: #111828;
-  --app-popover: #182034;
-  --app-border-subtle: #1E2840;
+  --app-primary: #030509; 
+  --app-surface: #0A0D17;
+  --app-elevated: #111626;
+  --app-popover: #1C233B;
+  --app-border-subtle: #2A3655;
   --app-text-primary: #FFFFFF;
-  --app-text-secondary: #8B949E;
+  --app-text-secondary: #94A3B8;
 }
 
 @theme {
@@ -97,6 +97,56 @@
   .glass-card:hover {
     border-color: var(--color-text-secondary);
   }
+
+  .glass-panel {
+    background: color-mix(in srgb, var(--color-elevated) 70%, transparent);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid color-mix(in srgb, var(--color-border-subtle) 50%, transparent);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    transition: all 0.3s ease-in-out;
+  }
+  
+  .glass-panel:hover {
+    border-color: color-mix(in srgb, var(--color-border-subtle) 90%, transparent);
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+  }
+
+  .mesh-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+    background-color: var(--color-primary);
+  }
+  .mesh-blob-1 {
+    position: absolute;
+    top: -10%;
+    left: -10%;
+    width: 50vw;
+    height: 50vw;
+    background: radial-gradient(circle, rgba(124,110,250,0.15) 0%, transparent 70%);
+    border-radius: 50%;
+    filter: blur(80px);
+    animation: drift 20s ease-in-out infinite alternate;
+  }
+  .mesh-blob-2 {
+    position: absolute;
+    bottom: -10%;
+    right: -10%;
+    width: 60vw;
+    height: 60vw;
+    background: radial-gradient(circle, rgba(0,212,170,0.1) 0%, transparent 70%);
+    border-radius: 50%;
+    filter: blur(100px);
+    animation: drift 25s ease-in-out infinite alternate-reverse;
+  }
 }
 
 @keyframes fadeInUp {
@@ -108,4 +158,10 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+@keyframes drift {
+  0% { transform: translate(0px, 0px) scale(1); }
+  50% { transform: translate(30px, -50px) scale(1.1); }
+  100% { transform: translate(-20px, 20px) scale(0.9); }
 }

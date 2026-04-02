@@ -10,7 +10,7 @@ export const Card = ({ children, className, ...props }) => {
   return (
     <div 
       className={cn(
-        "bg-[var(--color-elevated)] border-transparent ring-1 ring-white/5 rounded-md relative overflow-hidden transition-all duration-200 hover:ring-white/10",
+        "glass-panel relative overflow-hidden",
         className
       )} 
       {...props}
