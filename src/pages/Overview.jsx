@@ -146,7 +146,7 @@ export const Overview = () => {
            <Icon className="w-4 h-4" style={{ color: `var(--color-${badgeColor})`}} />
          </div>
       </div>
-      <div className="text-[18px] md:text-[28px] font-mono tracking-tight text-white mb-2">{value}</div>
+      <div className="text-[18px] md:text-[28px] font-mono tracking-tight text-[var(--color-text-primary)] mb-2">{value}</div>
       <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--color-${isPositive ? 'teal' : 'rose'})]/10 text-[var(--color-${isPositive ? 'teal' : 'rose'})]`}>
          {isPositive ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
          {changeStr} vs last
@@ -160,12 +160,12 @@ export const Overview = () => {
       {/* Title & Period Selector */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 fade-in-up">
         <div>
-          <h1 className="text-[13px] md:text-2xl font-semibold text-white tracking-tight">Overview</h1>
+          <h1 className="text-[13px] md:text-2xl font-semibold text-[var(--color-text-primary)] tracking-tight">Overview</h1>
           <p className="hidden md:block text-sm text-[var(--color-text-secondary)]">Consolidated ledger overview</p>
         </div>
         <div className="flex items-center bg-[var(--color-elevated)] border border-[var(--color-border-subtle)] p-1 rounded-full overflow-x-auto whitespace-nowrap scrollbar-hide max-w-full">
            {['1W', '1M', '6M', '1Y', 'All'].map(p => (
-             <button key={p} onClick={() => setPeriod(p)} className={`px-4 py-1.5 min-h-[44px] min-w-[44px] md:min-h-0 md:min-w-0 text-xs font-medium rounded-full transition-all ${period === p ? 'bg-[var(--color-popover)] text-white shadow-sm' : 'text-gray-500 hover:text-gray-300'}`}>
+             <button key={p} onClick={() => setPeriod(p)} className={`px-4 py-1.5 min-h-[44px] min-w-[44px] md:min-h-0 md:min-w-0 text-xs font-medium rounded-full transition-all ${period === p ? 'bg-[var(--color-popover)] text-[var(--color-text-primary)] shadow-sm' : 'text-gray-500 hover:text-[var(--color-text-primary)]'}`}>
                {p}
              </button>
            ))}
@@ -196,8 +196,8 @@ export const Overview = () => {
            <div className="flex justify-between items-center mb-4">
              <h3 className="text-[13px] md:text-base font-semibold">Distribution</h3>
              <div className="flex bg-[var(--color-primary)] border border-[var(--color-border-subtle)] rounded p-0.5 min-h-[44px] md:min-h-0 items-center">
-               <button onClick={() => setDonutType('expense')} className={`px-2 py-2 md:py-0.5 min-h-[36px] md:min-h-0 text-[10px] font-semibold rounded ${donutType === 'expense' ? 'bg-[var(--color-elevated)] text-white' : 'text-gray-500'}`}>Expense</button>
-               <button onClick={() => setDonutType('income')} className={`px-2 py-2 md:py-0.5 min-h-[36px] md:min-h-0 text-[10px] font-semibold rounded ${donutType === 'income' ? 'bg-[var(--color-elevated)] text-white' : 'text-gray-500'}`}>Income</button>
+               <button onClick={() => setDonutType('expense')} className={`px-2 py-2 md:py-0.5 min-h-[36px] md:min-h-0 text-[10px] font-semibold rounded ${donutType === 'expense' ? 'bg-[var(--color-elevated)] text-[var(--color-text-primary)]' : 'text-gray-500'}`}>Expense</button>
+               <button onClick={() => setDonutType('income')} className={`px-2 py-2 md:py-0.5 min-h-[36px] md:min-h-0 text-[10px] font-semibold rounded ${donutType === 'income' ? 'bg-[var(--color-elevated)] text-[var(--color-text-primary)]' : 'text-gray-500'}`}>Income</button>
              </div>
            </div>
            <div className="relative w-[110px] h-[110px] md:max-w-[180px] md:w-full md:aspect-square md:h-auto mx-auto mb-6 flex items-center justify-center">
@@ -206,7 +206,7 @@ export const Overview = () => {
                   <Doughnut data={donutConfig} options={{ plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(context) { return ' ' + context.label + ': ' + formatCurrency(context.parsed); } } } }, maintainAspectRatio: false }} />
                   <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                     <span className="text-[10px] text-[var(--color-text-secondary)] font-sans uppercase tracking-widest">Total</span>
-                    <span className="text-lg font-mono font-semibold text-white">{formatCurrency(totalForDonut)}</span>
+                    <span className="text-lg font-mono font-semibold text-[var(--color-text-primary)]">{formatCurrency(totalForDonut)}</span>
                   </div>
                 </>
              ) : <span className="text-[var(--color-text-secondary)] text-sm font-sans tracking-tight">No data</span>}
@@ -236,7 +236,7 @@ export const Overview = () => {
          <Card className="flex-[1] p-5 fade-in-up stagger-5">
            <div className="flex items-center justify-between mb-4">
              <h3 className="text-base font-semibold">Recent Transactions</h3>
-             <button className="text-xs text-[var(--color-violet)] hover:text-white transition-colors">View All</button>
+             <button className="text-xs text-[var(--color-violet)] hover:text-[var(--color-text-primary)] transition-colors">View All</button>
            </div>
            <div className="space-y-4">
              {recentTx.map((t, index) => (
@@ -246,7 +246,7 @@ export const Overview = () => {
                      <Box className="w-3.5 h-3.5" />
                    </div>
                    <div className="flex flex-col">
-                     <span className="text-sm font-medium leading-none mb-1 text-white">{t.description}</span>
+                     <span className="text-sm font-medium leading-none mb-1 text-[var(--color-text-primary)]">{t.description}</span>
                      <span className="text-[10px] text-gray-500">{t.category}</span>
                    </div>
                  </div>
@@ -272,11 +272,11 @@ export const Overview = () => {
                   <div className={`w-8 h-8 rounded-lg bg-[var(--color-${insight.c})]/10 flex items-center justify-center text-[var(--color-${insight.c})]`}>
                      <insight.icon className="w-4 h-4" />
                   </div>
-                  <ChevronRight className="w-4 h-4 text-gray-600 group-hover:text-white transition-colors" />
+                  <ChevronRight className="w-4 h-4 text-gray-600 group-hover:text-[var(--color-text-primary)] transition-colors" />
                 </div>
                 <div>
                   <div className="text-sm text-[var(--color-text-secondary)] mb-1">{insight.label}</div>
-                  <div className="text-2xl font-mono text-white mb-2">{insight.value}</div>
+                  <div className="text-2xl font-mono text-[var(--color-text-primary)] mb-2">{insight.value}</div>
                   <div className="text-[10px] text-gray-500">{insight.desc}</div>
                 </div>
               </Card>

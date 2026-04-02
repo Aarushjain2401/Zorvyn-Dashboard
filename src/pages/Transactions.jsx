@@ -84,7 +84,7 @@ export const Transactions = () => {
   return (
     <div className="space-y-6 fade-in-up">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-white tracking-wide">Transactions</h1>
+        <h1 className="text-2xl font-semibold text-[var(--color-text-primary)] tracking-wide">Transactions</h1>
       </div>
 
       <Card className="p-6 overflow-visible border-transparent shadow-[0_4px_24px_rgba(0,0,0,0.2)]">
@@ -144,7 +144,7 @@ export const Transactions = () => {
             {currentData.length > 0 ? currentData.map((t) => (
               <TableRow key={t.id} className="border-b-[var(--color-border-subtle)] hover:bg-[var(--color-popover)] border-b last:border-b-0">
                 <TableCell className="text-sm font-medium">{new Date(t.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric'})}</TableCell>
-                <TableCell className="hidden lg:table-cell font-semibold text-white">{t.description}</TableCell>
+                <TableCell className="hidden lg:table-cell font-semibold text-[var(--color-text-primary)]">{t.description}</TableCell>
                 <TableCell>
                   <Badge variant="neutral">{t.category}</Badge>
                 </TableCell>
@@ -189,13 +189,13 @@ export const Transactions = () => {
                 <span className="text-[12px] text-gray-500 font-medium">
                   {new Date(t.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric'})}
                 </span>
-                <span className={`text-[15px] font-mono font-semibold ${t.type === 'income' ? 'text-[var(--color-teal)]' : 'text-white'}`}>
+                <span className={`text-[15px] font-mono font-semibold ${t.type === 'income' ? 'text-[var(--color-teal)]' : 'text-[var(--color-text-primary)]'}`}>
                   {t.type === 'income' ? '+' : '-'}{formatCurrency(t.amount)}
                 </span>
               </div>
               <div className="flex justify-between items-end mt-1">
                 <div className="flex flex-col gap-1.5">
-                  <span className="text-[15px] font-semibold text-white leading-tight">{t.description}</span>
+                  <span className="text-[15px] font-semibold text-[var(--color-text-primary)] leading-tight">{t.description}</span>
                   <div className="flex gap-2">
                     <Badge variant="neutral">{t.category}</Badge>
                     <Badge variant={t.type}>{t.type}</Badge>

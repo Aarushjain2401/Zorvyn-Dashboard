@@ -44,7 +44,7 @@ export const Insights = () => {
   return (
     <div className="space-y-6 fade-in-up">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-white tracking-wide">Financial Insights</h1>
+        <h1 className="text-2xl font-semibold text-[var(--color-text-primary)] tracking-wide">Financial Insights</h1>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -59,7 +59,7 @@ export const Insights = () => {
           <Card key={i} className="p-5 flex items-center justify-between group hover:bg-[var(--color-popover)] transition-colors">
             <div className="flex flex-col">
                <span className="text-sm font-medium text-[var(--color-text-secondary)] mb-2">{m.label}</span>
-               <span className="text-xl font-mono text-white tracking-tight">{m.val}</span>
+               <span className="text-xl font-mono text-[var(--color-text-primary)] tracking-tight">{m.val}</span>
             </div>
             <div className={`w-12 h-12 rounded-xl bg-[var(--color-${m.c})]/10 flex items-center justify-center text-[var(--color-${m.c})]`}>
               <m.icon className="w-5 h-5" />
@@ -70,7 +70,7 @@ export const Insights = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <Card className="p-6">
-          <h3 className="text-base font-semibold mb-4 text-white">6-Month Cash Flow Analysis</h3>
+          <h3 className="text-base font-semibold mb-4 text-[var(--color-text-primary)]">6-Month Cash Flow Analysis</h3>
           <div className="h-[300px] flex items-center justify-center">
              {transactions.length > 0 ? (
                <Bar data={barData} options={{ 
@@ -101,7 +101,7 @@ export const Insights = () => {
         </Card>
 
         <Card className="p-6 flex flex-col">
-           <h3 className="text-base font-semibold mb-6 text-white">Expense Distribution Breakdown</h3>
+           <h3 className="text-base font-semibold mb-6 text-[var(--color-text-primary)]">Expense Distribution Breakdown</h3>
            <div className="flex-1 overflow-y-auto space-y-5 pr-2">
               {catTotals.map(([cat, amt]) => {
                  const pct = metrics.totalExpense ? (amt / metrics.totalExpense) * 100 : 0;

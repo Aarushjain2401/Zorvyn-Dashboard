@@ -1,19 +1,39 @@
 @import "tailwindcss";
 
+:root {
+  --app-primary: #FFFFFF;
+  --app-surface: #F8FAFC;
+  --app-elevated: #F1F5F9;
+  --app-popover: #E2E8F0;
+  --app-border-subtle: #CBD5E1;
+  --app-text-primary: #0F172A;
+  --app-text-secondary: #475569;
+}
+
+:root[data-theme='dark'] {
+  --app-primary: #05070F; 
+  --app-surface: #0B0F1E;
+  --app-elevated: #111828;
+  --app-popover: #182034;
+  --app-border-subtle: #1E2840;
+  --app-text-primary: #FFFFFF;
+  --app-text-secondary: #8B949E;
+}
+
 @theme {
-  --color-primary: #05070F; 
-  --color-surface: #0B0F1E;
-  --color-elevated: #111828;
-  --color-popover: #182034;
-  --color-border-subtle: #1E2840;
+  --color-primary: var(--app-primary);
+  --color-surface: var(--app-surface);
+  --color-elevated: var(--app-elevated);
+  --color-popover: var(--app-popover);
+  --color-border-subtle: var(--app-border-subtle);
   
-  --color-violet: #2563EB; /* Corporate Blue */
-  --color-teal: #059669; /* Forest Green */
-  --color-rose: #DC2626; /* Crimson Red */
-  --color-amber: #D97706; /* Goldenrod */
-  
-  --color-text-primary: #FFFFFF;
-  --color-text-secondary: #8B949E;
+  --color-text-primary: var(--app-text-primary);
+  --color-text-secondary: var(--app-text-secondary);
+
+  --color-violet: #2563EB; 
+  --color-teal: #059669; 
+  --color-rose: #DC2626; 
+  --color-amber: #D97706; 
   
   --font-mono: 'Geist Mono', monospace;
   --font-sans: 'Geist', sans-serif;
@@ -68,14 +88,14 @@
   .stagger-5 { animation-delay: 250ms; }
 
   .glass-card {
-    background: #111828;
-    border: 1px solid #1E2840;
+    background: var(--color-elevated);
+    border: 1px solid var(--color-border-subtle);
     border-radius: 12px;
     transition: all 0.2s ease-in-out;
   }
   
   .glass-card:hover {
-    border-color: #2D3A5D;
+    border-color: var(--color-text-secondary);
   }
 }
 

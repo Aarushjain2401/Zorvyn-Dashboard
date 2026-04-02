@@ -3,7 +3,7 @@ import { Search, Bell, Plus } from 'lucide-react';
 import { useAppContext } from '../../context/AppProvider';
 
 export const Topbar = () => {
-  const { role, setRole, currency, setCurrency, openModal } = useAppContext();
+  const { role, setRole, currency, setCurrency, theme, setTheme, openModal } = useAppContext();
 
   return (
     <header className="fixed top-0 right-0 h-[56px] md:h-[60px] w-full md:w-[calc(100%-64px)] bg-[var(--color-surface)]/80 backdrop-blur-md border-b border-[var(--color-border-subtle)] flex items-center justify-between px-3 sm:px-6 z-30 transition-all">
@@ -34,8 +34,19 @@ export const Topbar = () => {
           className="hidden md:block bg-transparent border border-[var(--color-border-subtle)] rounded-md text-[10px] text-gray-400 focus:outline-none py-1 px-2 cursor-pointer"
         >
           {['USD', 'EUR', 'GBP', 'INR'].map(cur => (
-            <option key={cur} value={cur} className="bg-[var(--color-elevated)]">{cur}</option>
+            <option key={cur} value={cur} className="bg-[var(--color-elevated)] text-[var(--color-text-primary)]">{cur}</option>
           ))}
+        </select>
+
+        {/* Theme Selector (Hidden on Mobile) */}
+        <select 
+          value={theme} 
+          onChange={(e) => setTheme(e.target.value)}
+          className="hidden md:block bg-transparent border border-[var(--color-border-subtle)] rounded-md text-[10px] text-gray-400 focus:outline-none py-1 px-2 cursor-pointer"
+        >
+          <option value="system" className="bg-[var(--color-elevated)] text-[var(--color-text-primary)]">System Theme</option>
+          <option value="light" className="bg-[var(--color-elevated)] text-[var(--color-text-primary)]">Light Mode</option>
+          <option value="dark" className="bg-[var(--color-elevated)] text-[var(--color-text-primary)]">Dark Mode</option>
         </select>
 
         {/* Role Toggle Dropdown */}
@@ -44,8 +55,8 @@ export const Topbar = () => {
           onChange={(e) => setRole(e.target.value)}
           className="bg-transparent border border-[var(--color-border-subtle)] rounded-md text-[10px] text-gray-400 focus:outline-none px-2 cursor-pointer outline-none min-h-[44px] md:min-h-0 py-0 md:py-1"
         >
-          <option value="Admin" className="bg-[var(--color-elevated)] text-white">Admin</option>
-          <option value="Viewer" className="bg-[var(--color-elevated)] text-white">Viewer</option>
+          <option value="Admin" className="bg-[var(--color-elevated)] text-[var(--color-text-primary)]">Admin</option>
+          <option value="Viewer" className="bg-[var(--color-elevated)] text-[var(--color-text-primary)]">Viewer</option>
         </select>
 
         {/* Bell */}

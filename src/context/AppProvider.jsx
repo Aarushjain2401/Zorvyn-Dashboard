@@ -58,6 +58,10 @@ export const AppProvider = ({ children }) => {
     return localStorage.getItem('zorvyn_currency') || 'USD';
   });
 
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('zorvyn_theme') || 'system';
+  });
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingData, setEditingData] = useState(null);
 
@@ -77,6 +81,22 @@ export const AppProvider = ({ children }) => {
   useEffect(() => {
     localStorage.setItem('zorvyn_currency', currency);
   }, [currency]);
+
+  useEffect(() => {
+    localStorage.setItem('zorvyn_theme', theme);
+    const root = document.documentElement;
+    
+    if (theme === 'system') {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      root.setAttribute('data-theme', mediaQuery.matches ? 'dark' : 'light');
+      
+      const listener = (e) => root.setAttribute('data-theme', e.matches ? 'dark' : 'light');
+      mediaQuery.addEventListener('change', listener);
+      return () => mediaQuery.removeEventListener('change', listener);
+    } else {
+      root.setAttribute('data-theme', theme);
+    }
+  }, [theme]);
 
   const addTransaction = (t) => {
     setTransactions([{ ...t, id: uuidv4() }, ...transactions]);
@@ -102,6 +122,8 @@ export const AppProvider = ({ children }) => {
       setRole,
       currency,
       setCurrency,
+      theme,
+      setTheme,
       formatCurrency,
       isModalOpen,
       setIsModalOpen,
