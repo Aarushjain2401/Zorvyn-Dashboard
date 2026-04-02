@@ -9,7 +9,7 @@ export const Topbar = () => {
     <header className="fixed top-0 right-0 h-[56px] md:h-[60px] w-full md:w-[calc(100%-64px)] bg-[var(--color-surface)]/80 backdrop-blur-md border-b border-[var(--color-border-subtle)] flex items-center justify-between px-3 sm:px-6 z-30 transition-all">
       {/* Left */}
       <div className="flex items-center gap-3 w-auto md:w-1/4">
-        <span className="md:hidden font-bold text-[15px] tracking-tight ml-2">Zorvyn</span>
+        <img src="https://companyasset.blob.core.windows.net/assets/zorvynlogolight.png" alt="Zorvyn" className="md:hidden w-6 h-auto object-contain ml-2 opacity-90" />
       </div>
 
       {/* Center: Search (Hidden on Mobile/Tablet usually? Spec says: "Tablet: hide search. Mobile: hide search") */}
@@ -38,21 +38,15 @@ export const Topbar = () => {
           ))}
         </select>
 
-        {/* Role Toggle Pill (Tablet+ only) */}
-        <div className="hidden md:flex items-center bg-[var(--color-primary)] border border-[var(--color-border-subtle)] p-0.5 rounded-md h-[44px] md:h-auto">
-          <button 
-            onClick={() => setRole('Admin')} 
-            className={`px-3 py-1 text-[10px] font-semibold rounded transition-all ${role === 'Admin' ? 'bg-[var(--color-elevated)] text-white shadow-sm' : 'text-gray-500'}`}
-          >
-            Admin
-          </button>
-          <button 
-            onClick={() => setRole('Viewer')} 
-            className={`px-3 py-1 text-[10px] font-semibold rounded transition-all ${role === 'Viewer' ? 'bg-[var(--color-elevated)] text-white shadow-sm' : 'text-gray-500'}`}
-          >
-            Viewer
-          </button>
-        </div>
+        {/* Role Toggle Dropdown */}
+        <select 
+          value={role} 
+          onChange={(e) => setRole(e.target.value)}
+          className="bg-transparent border border-[var(--color-border-subtle)] rounded-md text-[10px] text-gray-400 focus:outline-none px-2 cursor-pointer outline-none min-h-[44px] md:min-h-0 py-0 md:py-1"
+        >
+          <option value="Admin" className="bg-[var(--color-elevated)] text-white">Admin</option>
+          <option value="Viewer" className="bg-[var(--color-elevated)] text-white">Viewer</option>
+        </select>
 
         {/* Bell */}
         <div className="relative text-gray-400 hover:text-white cursor-pointer transition-colors flex items-center justify-center min-w-[44px] min-h-[44px]">
