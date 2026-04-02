@@ -6,7 +6,7 @@ export const Statusbar = () => {
   const { transactions } = useAppContext();
   
   return (
-    <footer className="fixed bottom-0 right-0 h-[28px] bg-[var(--color-primary)] border-t border-[var(--color-border-subtle)] flex items-center justify-between px-4 z-30" style={{ width: 'calc(100% - 64px)' }}>
+    <footer className="hidden md:flex fixed bottom-0 right-0 h-[28px] w-full md:w-[calc(100%-64px)] bg-[var(--color-primary)] border-t border-[var(--color-border-subtle)] items-center justify-between px-4 z-30">
       <div className="flex items-center gap-4 text-[10px] text-gray-500 font-mono">
         <div className="flex items-center gap-1">
           <CheckCircle2 className="w-3 h-3 text-[var(--color-teal)]" />

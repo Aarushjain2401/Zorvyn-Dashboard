@@ -26,6 +26,9 @@
     font-family: var(--font-sans);
     margin: 0;
     letter-spacing: -0.01em;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-overflow-scrolling: touch;
+    overflow-x: hidden;
   }
 
   a {

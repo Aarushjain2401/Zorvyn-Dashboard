@@ -23,13 +23,13 @@ export const Modal = ({ isOpen, onClose, title, children, className }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
       <div 
         className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity" 
         onClick={onClose} 
       />
       <div className={cn(
-        "relative z-50 w-full max-w-lg rounded-md border border-[var(--color-border-subtle)] bg-[var(--color-elevated)] p-6 shadow-xl animate-in fade-in zoom-in-95 duration-200",
+        "relative z-50 w-full md:max-w-lg rounded-t-[16px] rounded-b-none md:rounded-md border-t md:border border-[var(--color-border-subtle)] bg-[var(--color-elevated)] p-5 md:p-6 pb-safe mb-0 md:mb-auto shadow-xl animate-in fade-in zoom-in-95 slide-in-from-bottom-5 md:slide-in-from-bottom-0 duration-200",
         className
       )}>
         <div className="flex items-center justify-between mb-4">

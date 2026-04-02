@@ -120,14 +120,14 @@ export const Transactions = () => {
           </div>
         </div>
 
-        <div className="w-full overflow-x-auto pb-2 scrollbar-thin">
+        <div className="hidden md:block w-full overflow-x-auto pb-2 scrollbar-thin">
           <Table className="min-w-[800px]">
             <TableHeader>
             <TableRow className="border-b-[var(--color-border-subtle)] hover:bg-transparent">
               <TableHead className="cursor-pointer font-sans uppercase tracking-wider text-[10px]" onClick={() => handleSort('date')}>
                 Date {sortConfig.key === 'date' && (sortConfig.direction === 'asc' ? <ChevronUp className="inline w-3 h-3"/> : <ChevronDown className="inline w-3 h-3"/>)}
               </TableHead>
-              <TableHead className="cursor-pointer font-sans uppercase tracking-wider text-[10px]" onClick={() => handleSort('description')}>
+              <TableHead className="hidden lg:table-cell cursor-pointer font-sans uppercase tracking-wider text-[10px]" onClick={() => handleSort('description')}>
                 Description {sortConfig.key === 'description' && (sortConfig.direction === 'asc' ? <ChevronUp className="inline w-3 h-3"/> : <ChevronDown className="inline w-3 h-3"/>)}
               </TableHead>
               <TableHead className="cursor-pointer font-sans uppercase tracking-wider text-[10px]" onClick={() => handleSort('category')}>
@@ -144,7 +144,7 @@ export const Transactions = () => {
             {currentData.length > 0 ? currentData.map((t) => (
               <TableRow key={t.id} className="border-b-[var(--color-border-subtle)] hover:bg-[var(--color-popover)] border-b last:border-b-0">
                 <TableCell className="text-sm font-medium">{new Date(t.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric'})}</TableCell>
-                <TableCell className="font-semibold text-white">{t.description}</TableCell>
+                <TableCell className="hidden lg:table-cell font-semibold text-white">{t.description}</TableCell>
                 <TableCell>
                   <Badge variant="neutral">{t.category}</Badge>
                 </TableCell>
@@ -179,6 +179,45 @@ export const Transactions = () => {
              )}
           </TableBody>
         </Table>
+        </div>
+
+        {/* Mobile Cards rendering block */}
+        <div className="md:hidden flex flex-col gap-3">
+          {currentData.length > 0 ? currentData.map(t => (
+            <div key={t.id} className="bg-[var(--color-elevated)] border border-[var(--color-border-subtle)] p-4 rounded-xl flex flex-col gap-2 relative">
+              <div className="flex justify-between items-start">
+                <span className="text-[12px] text-gray-500 font-medium">
+                  {new Date(t.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric'})}
+                </span>
+                <span className={`text-[15px] font-mono font-semibold ${t.type === 'income' ? 'text-[var(--color-teal)]' : 'text-white'}`}>
+                  {t.type === 'income' ? '+' : '-'}{formatCurrency(t.amount)}
+                </span>
+              </div>
+              <div className="flex justify-between items-end mt-1">
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-[15px] font-semibold text-white leading-tight">{t.description}</span>
+                  <div className="flex gap-2">
+                    <Badge variant="neutral">{t.category}</Badge>
+                    <Badge variant={t.type}>{t.type}</Badge>
+                  </div>
+                </div>
+                {role === 'Admin' && (
+                  <div className="flex gap-2 min-h-[44px]">
+                    <Button variant="ghost" size="icon" className="w-[44px] h-[44px]" onClick={() => openModal(t)}>
+                      <Edit2 className="w-[18px] h-[18px] text-gray-400" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="w-[44px] h-[44px]" onClick={() => { if(window.confirm('Delete this?')) deleteTransaction(t.id); }}>
+                      <Trash2 className="w-[18px] h-[18px] text-[var(--color-rose)]" />
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )) : (
+            <div className="text-center py-10 text-gray-500 bg-[var(--color-elevated)] rounded-xl border border-[var(--color-border-subtle)]">
+                <p className="text-sm">No transactions found.</p>
+            </div>
+          )}
         </div>
 
         {pageCount > 1 && (

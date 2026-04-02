@@ -2,7 +2,7 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { LayoutDashboard, ArrowLeftRight, Lightbulb, Wallet, Settings } from 'lucide-react';
 
-export const Sidebar = ({ isOpen, setIsOpen }) => {
+export const Sidebar = () => {
   const icons = [
     { to: '/', icon: LayoutDashboard },
     { to: '/transactions', icon: ArrowLeftRight },
@@ -12,7 +12,7 @@ export const Sidebar = ({ isOpen, setIsOpen }) => {
   ];
 
   return (
-    <aside className={`fixed left-0 top-0 bottom-0 w-[64px] bg-[var(--color-surface)] border-r border-[var(--color-border-subtle)] flex flex-col items-center py-4 z-50 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+    <aside className="hidden md:flex fixed left-0 top-0 bottom-0 w-[64px] bg-[var(--color-surface)] border-r border-[var(--color-border-subtle)] flex-col items-center py-4 z-40">
       {/* Logo */}
       <div className="w-14 h-14 mb-6 mt-2 flex items-center justify-center">
         <img src="https://companyasset.blob.core.windows.net/assets/zorvynlogolight.png" alt="Zorvyn Logo" className="w-8 h-auto object-contain opacity-90" />

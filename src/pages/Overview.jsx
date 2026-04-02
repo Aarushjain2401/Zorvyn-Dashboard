@@ -139,14 +139,14 @@ export const Overview = () => {
   const recentTx = [...transactions].sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
 
   const KPICard = ({ title, value, badgeColor, icon: Icon, changeStr, isPositive, delay }) => (
-    <Card className={`p-5 fade-in-up stagger-${delay}`}>
+    <Card className={`p-[14px] md:p-5 fade-in-up stagger-${delay}`}>
       <div className="flex justify-between items-start mb-2">
-         <span className="text-sm font-medium text-[var(--color-text-secondary)] font-sans">{title}</span>
-         <div className="w-8 h-8 rounded-[8px] flex items-center justify-center bg-[var(--color-popover)]">
+         <span className="text-[13px] md:text-sm font-medium text-[var(--color-text-secondary)] font-sans">{title}</span>
+         <div className="w-[38px] h-[38px] md:w-8 md:h-8 min-w-[38px] md:min-w-[32px] rounded-[8px] flex items-center justify-center bg-[var(--color-popover)]">
            <Icon className="w-4 h-4" style={{ color: `var(--color-${badgeColor})`}} />
          </div>
       </div>
-      <div className="text-[28px] font-mono tracking-tight text-white mb-2">{value}</div>
+      <div className="text-[18px] md:text-[28px] font-mono tracking-tight text-white mb-2">{value}</div>
       <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--color-${isPositive ? 'teal' : 'rose'})]/10 text-[var(--color-${isPositive ? 'teal' : 'rose'})]`}>
          {isPositive ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
          {changeStr} vs last
@@ -160,12 +160,12 @@ export const Overview = () => {
       {/* Title & Period Selector */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 fade-in-up">
         <div>
-          <h1 className="text-2xl font-semibold text-white tracking-tight">Overview</h1>
-          <p className="text-sm text-[var(--color-text-secondary)]">Consolidated ledger overview</p>
+          <h1 className="text-[13px] md:text-2xl font-semibold text-white tracking-tight">Overview</h1>
+          <p className="hidden md:block text-sm text-[var(--color-text-secondary)]">Consolidated ledger overview</p>
         </div>
-        <div className="flex items-center bg-[var(--color-elevated)] border border-[var(--color-border-subtle)] p-1 rounded-full">
+        <div className="flex items-center bg-[var(--color-elevated)] border border-[var(--color-border-subtle)] p-1 rounded-full overflow-x-auto whitespace-nowrap scrollbar-hide max-w-full">
            {['1W', '1M', '6M', '1Y', 'All'].map(p => (
-             <button key={p} onClick={() => setPeriod(p)} className={`px-4 py-1.5 text-xs font-medium rounded-full transition-all ${period === p ? 'bg-[var(--color-popover)] text-white shadow-sm' : 'text-gray-500 hover:text-gray-300'}`}>
+             <button key={p} onClick={() => setPeriod(p)} className={`px-4 py-1.5 min-h-[44px] min-w-[44px] md:min-h-0 md:min-w-0 text-xs font-medium rounded-full transition-all ${period === p ? 'bg-[var(--color-popover)] text-white shadow-sm' : 'text-gray-500 hover:text-gray-300'}`}>
                {p}
              </button>
            ))}
@@ -181,26 +181,26 @@ export const Overview = () => {
       </div>
 
       {/* Chart Row (1.7 : 1 ratio) */}
-      <div className="flex flex-col lg:flex-row gap-5">
-         <Card className="flex-[1.7] p-5 fade-in-up stagger-4 flex flex-col h-[400px]">
+      <div className="flex flex-col lg:flex-row gap-5 max-w-full overflow-hidden">
+         <Card className="flex-[1.7] p-4 md:p-5 fade-in-up stagger-4 flex flex-col h-[280px] md:h-[400px] overflow-hidden">
            <div className="mb-4">
-             <h3 className="text-base font-semibold">Cash Flow</h3>
-             <span className="text-xs text-[var(--color-text-secondary)]">Income vs Expense overlaid with Net Balance</span>
+             <h3 className="text-[13px] md:text-base font-semibold">Cash Flow</h3>
+             <span className="hidden md:block text-xs text-[var(--color-text-secondary)]">Income vs Expense overlaid with Net Balance</span>
            </div>
-           <div className="flex-1 min-h-[300px] flex items-center justify-center">
+           <div className="flex-1 min-h-[180px] md:min-h-[300px] flex items-center justify-center max-w-full overflow-hidden">
              {transactions.length > 0 ? <Bar data={comboChartData} options={comboOptions} /> : <span className="text-[var(--color-text-secondary)] text-sm font-sans tracking-tight">No data available</span>}
            </div>
          </Card>
 
-         <Card className="flex-[1] p-5 fade-in-up stagger-5 flex flex-col h-[400px] overflow-hidden">
+         <Card className="flex-[1] p-4 md:p-5 fade-in-up stagger-5 flex flex-col h-auto md:h-[400px] overflow-hidden">
            <div className="flex justify-between items-center mb-4">
-             <h3 className="text-base font-semibold">Distribution</h3>
-             <div className="flex bg-[var(--color-primary)] border border-[var(--color-border-subtle)] rounded p-0.5">
-               <button onClick={() => setDonutType('expense')} className={`px-2 py-0.5 text-[10px] font-semibold rounded ${donutType === 'expense' ? 'bg-[var(--color-elevated)] text-white' : 'text-gray-500'}`}>Expense</button>
-               <button onClick={() => setDonutType('income')} className={`px-2 py-0.5 text-[10px] font-semibold rounded ${donutType === 'income' ? 'bg-[var(--color-elevated)] text-white' : 'text-gray-500'}`}>Income</button>
+             <h3 className="text-[13px] md:text-base font-semibold">Distribution</h3>
+             <div className="flex bg-[var(--color-primary)] border border-[var(--color-border-subtle)] rounded p-0.5 min-h-[44px] md:min-h-0 items-center">
+               <button onClick={() => setDonutType('expense')} className={`px-2 py-2 md:py-0.5 min-h-[36px] md:min-h-0 text-[10px] font-semibold rounded ${donutType === 'expense' ? 'bg-[var(--color-elevated)] text-white' : 'text-gray-500'}`}>Expense</button>
+               <button onClick={() => setDonutType('income')} className={`px-2 py-2 md:py-0.5 min-h-[36px] md:min-h-0 text-[10px] font-semibold rounded ${donutType === 'income' ? 'bg-[var(--color-elevated)] text-white' : 'text-gray-500'}`}>Income</button>
              </div>
            </div>
-           <div className="relative w-full max-w-[180px] aspect-square mx-auto mb-6 flex items-center justify-center">
+           <div className="relative w-[110px] h-[110px] md:max-w-[180px] md:w-full md:aspect-square md:h-auto mx-auto mb-6 flex items-center justify-center">
              {transactions.length > 0 ? (
                 <>
                   <Doughnut data={donutConfig} options={{ plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(context) { return ' ' + context.label + ': ' + formatCurrency(context.parsed); } } } }, maintainAspectRatio: false }} />
@@ -239,8 +239,8 @@ export const Overview = () => {
              <button className="text-xs text-[var(--color-violet)] hover:text-white transition-colors">View All</button>
            </div>
            <div className="space-y-4">
-             {recentTx.map(t => (
-               <div key={t.id} className="flex justify-between items-center bg-[var(--color-popover)]/50 p-2.5 rounded-lg border border-[var(--color-border-subtle)]">
+             {recentTx.map((t, index) => (
+               <div key={t.id} className={`flex justify-between items-center bg-[var(--color-popover)]/50 py-[8px] px-0 md:p-2.5 md:rounded-lg border-b md:border md:border-[var(--color-border-subtle)] border-gray-800 ${index === 4 ? 'hidden md:flex' : ''}`}>
                  <div className="flex items-center gap-3">
                    <div className="w-8 h-8 rounded-full bg-[var(--color-elevated)] flex items-center justify-center text-gray-500 border border-[var(--color-border-subtle)]">
                      <Box className="w-3.5 h-3.5" />
@@ -267,8 +267,8 @@ export const Overview = () => {
               { icon: Box, label: "Total Assets", value: "32", desc: "Active monitored accounts", c: 'teal' },
               { icon: CreditCard, label: "Runway", value: "24.5", desc: "Months at current burn", c: 'amber' },
             ].map((insight, idx) => (
-              <Card key={idx} className="p-5 flex flex-col justify-between group cursor-pointer hover:bg-[var(--color-popover)]">
-                <div className="flex justify-between items-start mb-6">
+              <Card key={idx} className="py-[10px] px-[12px] md:p-5 flex flex-col justify-between group cursor-pointer hover:bg-[var(--color-popover)] min-h-[88px]">
+                <div className="flex justify-between items-start mb-4 md:mb-6">
                   <div className={`w-8 h-8 rounded-lg bg-[var(--color-${insight.c})]/10 flex items-center justify-center text-[var(--color-${insight.c})]`}>
                      <insight.icon className="w-4 h-4" />
                   </div>

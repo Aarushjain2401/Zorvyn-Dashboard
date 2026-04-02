@@ -12,10 +12,10 @@ export const Button = React.forwardRef(({ children, className, variant = 'primar
   };
 
   const sizes = {
-    sm: "h-8 px-3 text-xs",
-    md: "h-10 px-4 text-sm",
-    lg: "h-12 px-6 text-base",
-    icon: "h-10 w-10",
+    sm: "h-8 md:h-8 min-h-[44px] md:min-h-0 px-3 text-xs",
+    md: "h-10 px-4 text-sm min-h-[44px] md:min-h-0",
+    lg: "h-12 px-6 text-base min-h-[44px] md:min-h-0",
+    icon: "h-10 w-10 min-h-[44px] min-w-[44px] md:min-h-0 md:min-w-0",
   };
 
   return (
