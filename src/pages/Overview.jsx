@@ -216,13 +216,13 @@ export const Overview = () => {
                <button onClick={() => setDonutType('income')} className={`px-2 py-2 md:py-0.5 min-h-[36px] md:min-h-0 text-[10px] font-semibold rounded ${donutType === 'income' ? 'bg-[var(--color-elevated)] text-[var(--color-text-primary)]' : 'text-[var(--color-text-secondary)]'}`}>Income</button>
              </div>
            </div>
-           <div className="relative w-[110px] h-[110px] md:max-w-[180px] md:w-full md:aspect-square md:h-auto mx-auto mb-6 flex items-center justify-center">
+           <div className="relative w-[140px] h-[140px] md:max-w-[180px] md:w-full md:aspect-square md:h-auto mx-auto mb-6 flex items-center justify-center">
              {transactions.length > 0 ? (
                 <>
                   <Doughnut data={donutConfig} options={{ plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(context) { return ' ' + context.label + ': ' + formatCurrency(context.parsed); } } } }, maintainAspectRatio: false }} />
-                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                    <span className="text-[10px] text-[var(--color-text-secondary)] font-sans uppercase tracking-widest">Total</span>
-                    <span className="text-lg font-mono font-semibold text-[var(--color-text-primary)]">{formatCurrency(totalForDonut)}</span>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none px-3 text-center">
+                    <span className="text-[8px] md:text-[9px] text-[var(--color-text-secondary)] font-sans uppercase tracking-widest mb-0.5">Total</span>
+                    <span className="text-[11px] md:text-[13px] font-mono font-semibold text-[var(--color-text-primary)] truncate max-w-[85%]">{formatCurrency(totalForDonut)}</span>
                   </div>
                 </>
              ) : <span className="text-[var(--color-text-secondary)] text-sm font-sans tracking-tight">No data</span>}
@@ -233,9 +233,9 @@ export const Overview = () => {
                  const pct = totalForDonut ? (amt / totalForDonut) * 100 : 0;
                  return (
                    <div key={cat} className="text-xs">
-                     <div className="flex justify-between mb-1">
-                       <span className="text-[var(--color-text-primary)]">{cat}</span>
-                       <span className="font-mono text-[var(--color-text-secondary)]">{pct.toFixed(0)}%</span>
+                     <div className="flex justify-between items-center mb-1 gap-2">
+                       <span className="text-[var(--color-text-primary)] truncate">{cat}</span>
+                       <span className="font-mono text-[var(--color-text-secondary)] shrink-0">{pct.toFixed(0)}%</span>
                      </div>
                      <div className="w-full h-1.5 bg-[var(--color-border-subtle)] rounded-full overflow-hidden">
                        <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: donutConfig.datasets[0].backgroundColor[i] }}></div>
