@@ -9,7 +9,7 @@ import { Badge } from '../components/UI/Badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/UI/Table';
 
 export const Transactions = () => {
-  const { transactions, role, deleteTransaction, formatCurrency, openModal } = useAppContext();
+  const { transactions, role, deleteTransaction, formatCurrency, formatCompactCurrency, openModal } = useAppContext();
   
   // States
   const [search, setSearch] = useState('');
@@ -23,6 +23,7 @@ export const Transactions = () => {
   const [toDate, setToDate] = useState('');
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [showConfirmDelete, setShowConfirmDelete] = useState(null);
+  const [expandedRow, setExpandedRow] = useState(null);
 
   const categories = useMemo(() => {
     const cats = new Set(transactions.map(t => t.category).filter(Boolean));
@@ -74,6 +75,11 @@ export const Transactions = () => {
     selectedIds.forEach(id => deleteTransaction(id));
     setSelectedIds(newSet => new Set());
     setShowConfirmDelete(null);
+  };
+
+  const toggleExpand = (id, e) => {
+    if (e.target.closest('input') || e.target.closest('button')) return;
+    setExpandedRow(prev => prev === id ? null : id);
   };
 
   const handleSort = (key) => {
@@ -128,8 +134,8 @@ export const Transactions = () => {
               {uniqueCategories.map(c => <option key={c} value={c}>{c}</option>)}
             </Select>
             <div className="flex gap-2 w-full lg:max-w-[280px]">
-               <input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} className="w-full px-2 py-1.5 text-xs bg-[var(--color-popover)] border border-[var(--color-border-subtle)] rounded shadow-sm focus:outline-none focus:ring-1 focus:ring-[var(--color-violet)] placeholder-[var(--color-text-secondary)]" />
-               <input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} className="w-full px-2 py-1.5 text-xs bg-[var(--color-popover)] border border-[var(--color-border-subtle)] rounded shadow-sm focus:outline-none focus:ring-1 focus:ring-[var(--color-violet)] placeholder-[var(--color-text-secondary)]" />
+               <input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} className="w-full px-2 py-1.5 text-xs bg-[var(--color-popover)] border border-[var(--color-border-subtle)] rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-[var(--color-violet)] placeholder-[var(--color-text-secondary)]" />
+               <input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} className="w-full px-2 py-1.5 text-xs bg-[var(--color-popover)] border border-[var(--color-border-subtle)] rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-[var(--color-violet)] placeholder-[var(--color-text-secondary)]" />
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -170,32 +176,55 @@ export const Transactions = () => {
           </TableHeader>
           <TableBody>
             {currentData.length > 0 ? currentData.map((t) => (
-              <TableRow key={t.id} className="group border-b-[var(--color-border-subtle)] hover:bg-[var(--color-popover)] border-b last:border-b-0 cursor-default">
-                {role === 'Admin' && <TableCell className="w-8 px-4 text-center"><input type="checkbox" checked={selectedIds.has(t.id)} onChange={() => toggleSelect(t.id)} className="cursor-pointer" /></TableCell>}
-                <TableCell className="text-sm font-medium">{new Date(t.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric'})}</TableCell>
-                <TableCell className="hidden lg:table-cell font-semibold text-[var(--color-text-primary)]">{t.description}</TableCell>
-                <TableCell>
-                  <Badge variant="neutral">{t.category}</Badge>
-                </TableCell>
-                <TableCell>
-                  <Badge variant={t.type}>{t.type}</Badge>
-                </TableCell>
-                <TableCell className="text-right font-mono font-medium">
-                  <span className={t.type === 'income' ? 'text-[var(--color-teal)]' : 'text-[var(--color-rose)]'}>
-                    {t.type === 'income' ? '+' : '-'}{formatCurrency(t.amount).replace(/^-/,'')}
-                  </span>
-                </TableCell>
-                {role === 'Admin' && (
-                  <TableCell className="text-right flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button variant="ghost" size="icon" className="w-8 h-8 rounded hover:bg-[var(--color-elevated)]" onClick={() => openModal(t)}>
-                      <Edit2 className="w-4 h-4 text-[var(--color-text-secondary)]" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="w-8 h-8 rounded hover:bg-[var(--color-elevated)]" onClick={() => setShowConfirmDelete([t.id])}>
-                      <Trash2 className="w-4 h-4 text-[var(--color-rose)]" />
-                    </Button>
+              <React.Fragment key={t.id}>
+                <TableRow className={`group border-b-[var(--color-border-subtle)] hover:bg-[var(--color-popover)] border-b last:border-b-0 cursor-pointer transition-colors duration-200 ${expandedRow === t.id ? 'bg-[var(--color-popover)]' : ''}`} onClick={(e) => toggleExpand(t.id, e)}>
+                  {role === 'Admin' && <TableCell className="w-8 px-4 text-center"><input type="checkbox" checked={selectedIds.has(t.id)} onChange={() => toggleSelect(t.id)} className="cursor-pointer" /></TableCell>}
+                  <TableCell className="text-sm font-medium">{new Date(t.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric'})}</TableCell>
+                  <TableCell className="hidden lg:table-cell font-semibold text-[var(--color-text-primary)]">{t.description}</TableCell>
+                  <TableCell>
+                    <Badge variant="neutral">{t.category}</Badge>
                   </TableCell>
+                  <TableCell>
+                    <Badge variant={t.type}>{t.type}</Badge>
+                  </TableCell>
+                  <TableCell className="text-right font-mono font-medium">
+                    <span className={t.type === 'income' ? 'text-[var(--color-teal)]' : 'text-[var(--color-rose)]'}>
+                      {t.type === 'income' ? '+' : '-'}{formatCompactCurrency(t.amount).replace(/^-/,'')}
+                    </span>
+                  </TableCell>
+                  {role === 'Admin' && (
+                    <TableCell className="text-right flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button variant="ghost" size="icon" className="w-8 h-8 rounded-md hover:bg-[var(--color-elevated)]" onClick={(e) => { e.stopPropagation(); openModal(t); }}>
+                        <Edit2 className="w-4 h-4 text-[var(--color-text-secondary)]" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="w-8 h-8 rounded-md hover:bg-[var(--color-elevated)]" onClick={(e) => { e.stopPropagation(); setShowConfirmDelete([t.id]); }}>
+                        <Trash2 className="w-4 h-4 text-[var(--color-rose)]" />
+                      </Button>
+                    </TableCell>
+                  )}
+                </TableRow>
+                {/* Expanded Details Row */}
+                {expandedRow === t.id && (
+                  <TableRow className="bg-[var(--color-popover)]/50 border-b-[var(--color-border-subtle)] hover:bg-transparent">
+                    <TableCell colSpan={role === 'Admin' ? 7 : 6} className="p-0 border-b-0">
+                      <div className="p-4 px-6 grid grid-cols-1 md:grid-cols-3 gap-6 bg-gradient-to-r from-[var(--color-popover)] to-transparent border-l-2 border-[var(--color-violet)] fade-in-up">
+                        <div>
+                          <div className="text-[10px] text-[var(--color-text-secondary)] uppercase tracking-wider mb-1">Transaction ID</div>
+                          <div className="font-mono text-xs text-[var(--color-text-primary)]">{t.id}</div>
+                        </div>
+                        <div>
+                          <div className="text-[10px] text-[var(--color-text-secondary)] uppercase tracking-wider mb-1">Exact Amount</div>
+                          <div className="font-mono text-xs text-[var(--color-text-primary)]">{formatCurrency(t.amount)}</div>
+                        </div>
+                        <div>
+                          <div className="text-[10px] text-[var(--color-text-secondary)] uppercase tracking-wider mb-1">Time & Account</div>
+                          <div className="text-xs text-[var(--color-text-primary)]">14:02 PM • Main Operations</div>
+                        </div>
+                      </div>
+                    </TableCell>
+                  </TableRow>
                 )}
-              </TableRow>
+              </React.Fragment>
              )) : (
               <TableRow>
                 <TableCell colSpan={role === 'Admin' ? 6 : 5} className="text-center py-12 text-[var(--color-text-secondary)]">
@@ -219,7 +248,7 @@ export const Transactions = () => {
                   {new Date(t.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric'})}
                 </span>
                 <span className={`text-[15px] font-mono font-semibold ${t.type === 'income' ? 'text-[var(--color-teal)]' : 'text-[var(--color-text-primary)]'}`}>
-                  {t.type === 'income' ? '+' : '-'}{formatCurrency(t.amount)}
+                  {t.type === 'income' ? '+' : '-'}{formatCompactCurrency(t.amount)}
                 </span>
               </div>
               <div className="flex justify-between items-end mt-1">

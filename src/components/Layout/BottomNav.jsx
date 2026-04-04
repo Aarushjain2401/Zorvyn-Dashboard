@@ -19,7 +19,7 @@ export const BottomNav = () => {
           to={item.to}
           className={({ isActive }) => `
             relative flex justify-center items-center h-[44px] min-w-[44px] rounded-full transition-all flex-1 mx-1
-            ${isActive ? 'bg-[var(--color-violet)]/20 text-[var(--color-violet)]' : 'text-[var(--color-text-secondary)] active:text-white'}
+            ${isActive ? 'bg-[var(--color-violet)]/20 text-[var(--color-violet)]' : 'text-[var(--color-text-secondary)] active:text-[var(--color-text-primary)]'}
           `}
         >
           <item.icon className="w-5 h-5 flex-shrink-0" strokeWidth={2.5} />

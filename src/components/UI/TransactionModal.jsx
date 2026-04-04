@@ -78,7 +78,7 @@ export const TransactionModal = () => {
                 {['expense', 'income'].map(opt => (
                   <li 
                     key={opt}
-                    className="px-3 py-2 text-sm text-white hover:bg-[var(--color-primary)] cursor-pointer"
+                    className="px-3 py-2 text-sm text-[var(--color-text-primary)] hover:bg-[var(--color-popover)] cursor-pointer"
                     onClick={() => { setFormData({...formData, type: opt}); setShowTypeDropdown(false); }}
                   >
                     {opt}
@@ -101,7 +101,7 @@ export const TransactionModal = () => {
                 {[...new Set(uniqueCategories)].map(c => (
                   <li 
                     key={c}
-                    className="px-3 py-2 text-sm text-white hover:bg-[var(--color-primary)] cursor-pointer"
+                    className="px-3 py-2 text-sm text-[var(--color-text-primary)] hover:bg-[var(--color-popover)] cursor-pointer"
                     onClick={() => { setFormData({...formData, category: c}); setShowCatDropdown(false); }}
                   >
                     {c}

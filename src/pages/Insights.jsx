@@ -5,7 +5,7 @@ import { Bar } from 'react-chartjs-2';
 import { Target, AlertTriangle, TrendingDown, DollarSign, Activity, Percent } from 'lucide-react';
 
 export const Insights = () => {
-  const { transactions, formatCurrency } = useAppContext();
+  const { transactions, formatCurrency, formatCompactCurrency } = useAppContext();
 
   const metrics = useMemo(() => {
     const totalIncome = transactions.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0);
@@ -49,12 +49,12 @@ export const Insights = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {[
-          { icon: TrendingDown, label: 'Monthly Burn Rate', val: formatCurrency(metrics.burnRate), c: 'rose' },
+          { icon: TrendingDown, label: 'Monthly Burn Rate', val: formatCompactCurrency(metrics.burnRate), c: 'rose' },
           { icon: Activity, label: 'Estimated Runway', val: `${metrics.runway} Months`, c: 'teal' },
           { icon: Percent, label: 'Highest Expense Category', val: catTotals[0]?.[0] || 'N/A', c: 'amber' },
           { icon: Target, label: 'Capital Efficiency', val: 'High', c: 'violet' },
           { icon: AlertTriangle, label: 'Anomalies Detected', val: '0', c: 'teal' },
-          { icon: DollarSign, label: 'Total Capital Processed', val: formatCurrency(metrics.totalIncome + metrics.totalExpense), c: 'violet' }
+          { icon: DollarSign, label: 'Total Capital Processed', val: formatCompactCurrency(metrics.totalIncome + metrics.totalExpense), c: 'violet' }
         ].map((m, i) => (
           <Card key={i} className="p-5 flex items-center justify-between group hover:bg-[var(--color-popover)] transition-colors">
             <div className="flex flex-col">
@@ -82,7 +82,7 @@ export const Insights = () => {
                        label: function(context) {
                          let label = context.dataset.label || '';
                          if (label) { label += ': '; }
-                         if (context.parsed.y !== null) { label += formatCurrency(context.parsed.y); }
+                         if (context.parsed.y !== null) { label += formatCompactCurrency(context.parsed.y); }
                          return label;
                        }
                      }
@@ -92,7 +92,7 @@ export const Insights = () => {
                    x: { grid: { display:false } }, 
                    y: { 
                      grid: { color: '#1E2840' },
-                     ticks: { callback: function(value) { return formatCurrency(value); } }
+                     ticks: { callback: function(value) { return formatCompactCurrency(value); } }
                    } 
                  } 
                }} />
@@ -109,7 +109,7 @@ export const Insights = () => {
                    <div key={cat} className="text-sm">
                      <div className="flex justify-between mb-2">
                        <span className="text-[var(--color-text-secondary)] font-medium">{cat}</span>
-                       <span className="font-mono text-[var(--color-text-secondary)]">{formatCurrency(amt)} <span className="text-[10px] ml-1">({pct.toFixed(1)}%)</span></span>
+                       <span className="font-mono text-[var(--color-text-secondary)]">{formatCompactCurrency(amt)} <span className="text-[10px] ml-1">({pct.toFixed(1)}%)</span></span>
                      </div>
                      <div className="w-full h-1.5 bg-[var(--color-elevated)] border border-[var(--color-border-subtle)] rounded-full overflow-hidden">
                        <div className="h-full bg-[var(--color-rose)] rounded-full" style={{ width: `${pct}%` }}></div>

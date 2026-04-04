@@ -3,7 +3,7 @@ import { Bell, Plus, Sun, Moon, ChevronDown, UserPlus } from 'lucide-react';
 import { useAppContext } from '../../context/AppProvider';
 
 export const Topbar = ({ isExpanded }) => {
-  const { role, setRole, currency, setCurrency, currencyRate, theme, setTheme, openModal } = useAppContext();
+  const { role, setRole, currency, setCurrency, currencyRate, theme, setTheme, openModal, ratesLastUpdated } = useAppContext();
   const [isCurrencyOpen, setIsCurrencyOpen] = useState(false);
   const [isRoleOpen, setIsRoleOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
@@ -36,9 +36,18 @@ export const Topbar = ({ isExpanded }) => {
         
         {/* Currency Dropdown (Custom) */}
         <div className="flex items-center gap-2 hidden md:flex">
-          <div className="flex flex-col items-end">
-            <span className="text-[9px] uppercase font-bold tracking-widest text-[var(--color-text-secondary)]">FX Rate</span>
-            {currency !== 'USD' && <span className="text-[9px] text-[var(--color-brand)] font-mono">1 USD = {currencyRate.toFixed(2)}</span>}
+          <div className="flex flex-col items-end gap-0.5 mt-1">
+            <span className="text-[9px] uppercase font-bold tracking-widest text-[var(--color-text-secondary)] leading-none">FX Rate</span>
+            {currency !== 'USD' && (
+              <span className="text-[9px] text-[var(--color-brand)] font-mono leading-none">
+                1 USD = {new Intl.NumberFormat(currency === 'INR' ? 'en-IN' : 'en-US', { style: 'currency', currency: currency, minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(currencyRate)}
+              </span>
+            )}
+            {currency !== 'USD' && ratesLastUpdated && (
+              <span className="text-[7.5px] text-[var(--color-text-secondary)] opacity-80 leading-none pb-0.5">
+                rate as of {Math.max(0, Math.round((new Date() - ratesLastUpdated) / 60000))} min ago
+              </span>
+            )}
           </div>
           <div className="relative" ref={currencyRef}>
             <button onClick={() => setIsCurrencyOpen(!isCurrencyOpen)} className="flex items-center justify-between w-[70px] h-8 px-2.5 text-xs font-semibold border border-[var(--color-border-subtle)] bg-[var(--color-elevated)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-violet)] text-[var(--color-text-primary)] transition-colors rounded-lg shadow-sm">
@@ -74,11 +83,11 @@ export const Topbar = ({ isExpanded }) => {
 
         {/* Role Toggle Dropdown (Custom) */}
         <div className="relative hidden md:block" ref={roleRef}>
-          <button onClick={() => setIsRoleOpen(!isRoleOpen)} className="flex items-center gap-2 h-8 px-3 text-xs font-semibold bg-[var(--color-elevated)] hover:bg-[var(--color-popover)] text-[var(--color-text-primary)] transition-colors rounded-none">
+          <button onClick={() => setIsRoleOpen(!isRoleOpen)} className="flex items-center gap-2 h-8 px-3 text-xs font-semibold bg-[var(--color-elevated)] hover:bg-[var(--color-popover)] text-[var(--color-text-primary)] transition-colors rounded-lg">
             {role} <ChevronDown className="w-3 h-3 text-[var(--color-text-secondary)]" />
           </button>
           {isRoleOpen && (
-            <div className="absolute top-full right-0 mt-1 w-24 bg-[var(--color-surface)] border border-[var(--color-border-subtle)] shadow-xl z-50 rounded-none overflow-hidden">
+            <div className="absolute top-full right-0 mt-1 w-24 bg-[var(--color-surface)] border border-[var(--color-border-subtle)] shadow-xl z-50 rounded-lg overflow-hidden">
               {roles.map(r => (
                 <button key={r} onClick={() => { setRole(r); setIsRoleOpen(false); }} className={`w-full text-left px-3 py-1.5 text-xs transition-colors hover:bg-[var(--color-elevated)] ${role === r ? 'text-[var(--color-violet)] font-bold' : 'text-[var(--color-text-primary)] font-medium'}`}>
                   {r}
@@ -90,9 +99,9 @@ export const Topbar = ({ isExpanded }) => {
 
         {/* Bell Custom Alert */}
         <div className="relative flex" ref={notifRef}>
-          <button onClick={() => setIsNotifOpen(!isNotifOpen)} className="relative text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-violet)] cursor-pointer transition-colors flex items-center justify-center min-w-[36px] min-h-[36px] rounded-lg">
+          <button onClick={() => setIsNotifOpen(!isNotifOpen)} className="relative text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-violet)] cursor-pointer transition-colors flex items-center justify-center min-w-[36px] min-h-[36px] rounded-none">
             <Bell className="w-[18px] h-[18px]" />
-            <span className="absolute top-1 right-1 w-3.5 h-3.5 bg-[var(--color-rose)] text-white text-[9px] font-bold rounded-full flex items-center justify-center">2</span>
+            <span className="absolute top-1 right-1 w-3.5 h-3.5 bg-[var(--color-rose)] text-white text-[9px] font-bold rounded-lg flex items-center justify-center">2</span>
           </button>
           {isNotifOpen && (
              <div className="absolute top-full right-0 mt-2 w-64 bg-[var(--color-surface)] border border-[var(--color-border-subtle)] shadow-xl z-50 rounded-lg overflow-hidden flex flex-col py-2">
@@ -110,8 +119,8 @@ export const Topbar = ({ isExpanded }) => {
         </div>
 
         {/* Profile */}
-        <div className="hidden md:flex items-center gap-3 border-l border-[var(--color-border-subtle)] pl-4 cursor-pointer hover:bg-[var(--color-popover)] p-1 rounded-none transition-colors ml-1">
-          <div className="w-7 h-7 rounded-none bg-[var(--color-violet)] text-white flex items-center justify-center font-bold text-xs">AJ</div>
+        <div className="hidden md:flex items-center gap-3 border-l border-[var(--color-border-subtle)] pl-4 cursor-pointer hover:bg-[var(--color-popover)] p-1 rounded-lg transition-colors ml-1">
+          <div className="w-7 h-7 rounded-full bg-[var(--color-violet)] text-white flex items-center justify-center font-bold text-xs">AJ</div>
         </div>
 
         {/* Add Actions */}
