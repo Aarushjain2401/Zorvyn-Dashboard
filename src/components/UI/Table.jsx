@@ -36,7 +36,7 @@ export const TableRow = ({ children, className, ...props }) => (
 export const TableHead = ({ children, className, ...props }) => (
   <th
     className={cn(
-      "h-12 px-4 text-left align-middle font-medium text-gray-400 [&:has([role=checkbox])]:pr-0",
+      "h-12 px-4 text-left align-middle font-medium text-[var(--color-text-secondary)] [&:has([role=checkbox])]:pr-0",
       className
     )}
     {...props}

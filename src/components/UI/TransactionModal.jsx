@@ -50,22 +50,22 @@ export const TransactionModal = () => {
     <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingData ? 'Edit Transaction' : 'Add Transaction'}>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-xs font-semibold mb-1 text-gray-400">Description</label>
+          <label className="block text-xs font-semibold mb-1 text-[var(--color-text-secondary)]">Description</label>
           <Input required value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-semibold mb-1 text-gray-400">Amount USD</label>
+            <label className="block text-xs font-semibold mb-1 text-[var(--color-text-secondary)]">Amount USD</label>
             <Input type="number" min="0" step="0.01" required value={formData.amount} onChange={(e) => setFormData({...formData, amount: e.target.value})} />
           </div>
           <div>
-            <label className="block text-xs font-semibold mb-1 text-gray-400">Date</label>
+            <label className="block text-xs font-semibold mb-1 text-[var(--color-text-secondary)]">Date</label>
             <Input type="date" required value={formData.date} onChange={(e) => setFormData({...formData, date: e.target.value})} />
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="relative">
-            <label className="block text-xs font-semibold mb-1 text-gray-400">Type</label>
+            <label className="block text-xs font-semibold mb-1 text-[var(--color-text-secondary)]">Type</label>
             <Input 
               required 
               value={formData.type} 
@@ -88,7 +88,7 @@ export const TransactionModal = () => {
             )}
           </div>
           <div className="relative">
-            <label className="block text-xs font-semibold mb-1 text-gray-400">Category</label>
+            <label className="block text-xs font-semibold mb-1 text-[var(--color-text-secondary)]">Category</label>
             <Input 
               required 
               value={formData.category} 

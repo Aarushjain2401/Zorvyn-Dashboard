@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { subDays } from 'date-fns';
 
@@ -17,10 +17,12 @@ const generateSeedData = () => {
       const isIncome = (j === 0); 
       const category = isIncome ? 'Revenue' : categories[Math.floor(Math.random() * categories.length)]; 
       
+      const rawAmount = isIncome ? (12000 + (Math.random() * 8000)) : (800 + (Math.random() * 4000));
+      
       data.push({
         id: uuidv4(),
         description: isIncome ? 'SaaS Subscription Revenue' : `${category} Services`,
-        amount: isIncome ? (12000 + (Math.random() * 8000)) : (800 + (Math.random() * 4000)),
+        amount: Math.round(rawAmount * 100) / 100,
         type: isIncome ? 'income' : 'expense',
         category: category,
         date: d.toISOString(),
@@ -65,6 +67,19 @@ export const AppProvider = ({ children }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingData, setEditingData] = useState(null);
 
+  const [rates, setRates] = useState(CURRENCY_CONFIG);
+
+  useEffect(() => {
+    fetch('https://open.er-api.com/v6/latest/USD')
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.rates) {
+          setRates(prev => ({ ...prev, ...data.rates }));
+        }
+      })
+      .catch(err => console.error("Could not fetch realtime rates:", err));
+  }, []);
+
   const openModal = (transaction = null) => {
     setEditingData(transaction);
     setIsModalOpen(true);
@@ -98,6 +113,19 @@ export const AppProvider = ({ children }) => {
     }
   }, [theme]);
 
+  const globalMetrics = useMemo(() => {
+    const totalIncome = transactions.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0);
+    const totalExpense = transactions.filter(t => t.type === 'expense').reduce((acc, t) => acc + t.amount, 0);
+    const balance = totalIncome - totalExpense;
+    const savingsRate = totalIncome > 0 ? ((balance / totalIncome) * 100).toFixed(1) : 0;
+    
+    // Normalize global burn rate across standard 6 month tracking
+    const burnRate = totalExpense / 6; 
+    const runway = burnRate > 0 ? (balance > 0 ? balance / burnRate : 0).toFixed(1) : (totalIncome > 0 ? 99 : 0);
+    
+    return { totalIncome, totalExpense, balance, savingsRate, burnRate, runway };
+  }, [transactions]);
+
   const addTransaction = (t) => {
     setTransactions([{ ...t, id: uuidv4() }, ...transactions]);
   };
@@ -111,13 +139,23 @@ export const AppProvider = ({ children }) => {
   };
 
   const formatCurrency = (val) => {
-    const converted = val * CURRENCY_CONFIG[currency];
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: currency, minimumFractionDigits: 2 }).format(converted);
+    const rate = rates[currency] || 1.0;
+    const converted = val * rate;
+    const formatted = new Intl.NumberFormat('en-US', { style: 'currency', currency: currency, minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(converted);
+    return formatted;
+  };
+
+  const formatCompactCurrency = (val) => {
+    const rate = rates[currency] || 1.0;
+    const converted = val * rate;
+    const formatted = new Intl.NumberFormat('en-US', { style: 'currency', currency: currency, notation: 'compact', compactDisplay: 'short' }).format(converted);
+    return formatted.replace('K', 'k');
   };
 
   return (
     <AppContext.Provider value={{
       transactions,
+      globalMetrics,
       role,
       setRole,
       currency,
@@ -125,6 +163,8 @@ export const AppProvider = ({ children }) => {
       theme,
       setTheme,
       formatCurrency,
+      formatCompactCurrency,
+      currencyRate: rates[currency] || 1.0,
       isModalOpen,
       setIsModalOpen,
       editingData,

@@ -19,8 +19,13 @@ export const Transactions = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
   
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
+  const [selectedIds, setSelectedIds] = useState(new Set());
+  const [showConfirmDelete, setShowConfirmDelete] = useState(null);
+
   const categories = useMemo(() => {
-    const cats = new Set(transactions.map(t => t.category));
+    const cats = new Set(transactions.map(t => t.category).filter(Boolean));
     return ['All', ...Array.from(cats), 'General', 'Revenue', 'Payroll', 'Infrastructure', 'Marketing', 'SaaS', 'Office'];
   }, [transactions]);
   const uniqueCategories = [...new Set(categories)];
@@ -31,7 +36,9 @@ export const Transactions = () => {
       const matchSearch = t.description.toLowerCase().includes(search.toLowerCase()) || t.category.toLowerCase().includes(search.toLowerCase());
       const matchType = typeFilter === 'All' || t.type === typeFilter.toLowerCase();
       const matchCat = catFilter === 'All' || t.category === catFilter;
-      return matchSearch && matchType && matchCat;
+      const matchFrom = !fromDate || new Date(t.date) >= new Date(fromDate);
+      const matchTo = !toDate || new Date(t.date) <= new Date(toDate + 'T23:59:59');
+      return matchSearch && matchType && matchCat && matchFrom && matchTo;
     });
 
     filtered.sort((a, b) => {
@@ -55,6 +62,19 @@ export const Transactions = () => {
 
   const pageCount = Math.ceil(processedTransactions.length / itemsPerPage);
   const currentData = processedTransactions.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  const toggleSelect = (id) => {
+    const newSet = new Set(selectedIds);
+    if (newSet.has(id)) newSet.delete(id);
+    else newSet.add(id);
+    setSelectedIds(newSet);
+  };
+
+  const handleBulkDelete = () => {
+    selectedIds.forEach(id => deleteTransaction(id));
+    setSelectedIds(newSet => new Set());
+    setShowConfirmDelete(null);
+  };
 
   const handleSort = (key) => {
     let direction = 'asc';
@@ -91,7 +111,7 @@ export const Transactions = () => {
         <div className="flex flex-col lg:flex-row justify-between gap-4 mb-6">
           <div className="flex flex-col sm:flex-row gap-3 flex-1">
             <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
+              <Search className="absolute left-3 top-2.5 h-4 w-4 text-[var(--color-text-secondary)]" />
               <Input 
                 placeholder="Search transactions..." 
                 className="pl-9" 
@@ -104,9 +124,13 @@ export const Transactions = () => {
               <Button variant={typeFilter === 'Income' ? 'primary' : 'secondary'} onClick={() => setTypeFilter('Income')}>Income</Button>
               <Button variant={typeFilter === 'Expense' ? 'primary' : 'secondary'} onClick={() => setTypeFilter('Expense')}>Expense</Button>
             </div>
-            <Select className="w-full sm:w-48" value={catFilter} onChange={(e) => setCatFilter(e.target.value)}>
+            <Select className="w-full sm:w-40" value={catFilter} onChange={(e) => setCatFilter(e.target.value)}>
               {uniqueCategories.map(c => <option key={c} value={c}>{c}</option>)}
             </Select>
+            <div className="flex gap-2 w-full lg:max-w-[280px]">
+               <input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} className="w-full px-2 py-1.5 text-xs bg-[var(--color-popover)] border border-[var(--color-border-subtle)] rounded shadow-sm focus:outline-none focus:ring-1 focus:ring-[var(--color-violet)] placeholder-[var(--color-text-secondary)]" />
+               <input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} className="w-full px-2 py-1.5 text-xs bg-[var(--color-popover)] border border-[var(--color-border-subtle)] rounded shadow-sm focus:outline-none focus:ring-1 focus:ring-[var(--color-violet)] placeholder-[var(--color-text-secondary)]" />
+            </div>
           </div>
           <div className="flex items-center gap-3">
             <Button variant="secondary" onClick={exportCSV}>
@@ -124,6 +148,10 @@ export const Transactions = () => {
           <Table className="min-w-[800px]">
             <TableHeader>
             <TableRow className="border-b-[var(--color-border-subtle)] hover:bg-transparent">
+              {role === 'Admin' && <TableHead className="w-8 px-4 text-center"><input type="checkbox" onChange={(e) => {
+                if (e.target.checked) setSelectedIds(new Set(currentData.map(t => t.id)));
+                else setSelectedIds(new Set());
+              }} checked={currentData.length > 0 && selectedIds.size === currentData.length} className="cursor-pointer" /></TableHead>}
               <TableHead className="cursor-pointer font-sans uppercase tracking-wider text-[10px]" onClick={() => handleSort('date')}>
                 Date {sortConfig.key === 'date' && (sortConfig.direction === 'asc' ? <ChevronUp className="inline w-3 h-3"/> : <ChevronDown className="inline w-3 h-3"/>)}
               </TableHead>
@@ -142,7 +170,8 @@ export const Transactions = () => {
           </TableHeader>
           <TableBody>
             {currentData.length > 0 ? currentData.map((t) => (
-              <TableRow key={t.id} className="border-b-[var(--color-border-subtle)] hover:bg-[var(--color-popover)] border-b last:border-b-0">
+              <TableRow key={t.id} className="group border-b-[var(--color-border-subtle)] hover:bg-[var(--color-popover)] border-b last:border-b-0 cursor-default">
+                {role === 'Admin' && <TableCell className="w-8 px-4 text-center"><input type="checkbox" checked={selectedIds.has(t.id)} onChange={() => toggleSelect(t.id)} className="cursor-pointer" /></TableCell>}
                 <TableCell className="text-sm font-medium">{new Date(t.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric'})}</TableCell>
                 <TableCell className="hidden lg:table-cell font-semibold text-[var(--color-text-primary)]">{t.description}</TableCell>
                 <TableCell>
@@ -152,16 +181,16 @@ export const Transactions = () => {
                   <Badge variant={t.type}>{t.type}</Badge>
                 </TableCell>
                 <TableCell className="text-right font-mono font-medium">
-                  <span className={t.type === 'income' ? 'text-[var(--color-teal)]' : 'text-gray-300'}>
-                    {t.type === 'income' ? '+' : '-'}{formatCurrency(t.amount)}
+                  <span className={t.type === 'income' ? 'text-[var(--color-teal)]' : 'text-[var(--color-rose)]'}>
+                    {t.type === 'income' ? '+' : '-'}{formatCurrency(t.amount).replace(/^-/,'')}
                   </span>
                 </TableCell>
                 {role === 'Admin' && (
-                  <TableCell className="text-right flex justify-end gap-1">
-                    <Button variant="ghost" size="icon" onClick={() => openModal(t)}>
-                      <Edit2 className="w-4 h-4 text-gray-500" />
+                  <TableCell className="text-right flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button variant="ghost" size="icon" className="w-8 h-8 rounded hover:bg-[var(--color-elevated)]" onClick={() => openModal(t)}>
+                      <Edit2 className="w-4 h-4 text-[var(--color-text-secondary)]" />
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={() => { if(window.confirm('Are you sure you want to permanently delete this transaction?')) deleteTransaction(t.id); }}>
+                    <Button variant="ghost" size="icon" className="w-8 h-8 rounded hover:bg-[var(--color-elevated)]" onClick={() => setShowConfirmDelete([t.id])}>
                       <Trash2 className="w-4 h-4 text-[var(--color-rose)]" />
                     </Button>
                   </TableCell>
@@ -169,7 +198,7 @@ export const Transactions = () => {
               </TableRow>
              )) : (
               <TableRow>
-                <TableCell colSpan={role === 'Admin' ? 6 : 5} className="text-center py-12 text-gray-500">
+                <TableCell colSpan={role === 'Admin' ? 6 : 5} className="text-center py-12 text-[var(--color-text-secondary)]">
                   <div className="flex flex-col items-center justify-center">
                     <Search className="w-10 h-10 mb-2 opacity-20" />
                     <p className="text-sm">No transactions match your search filters.</p>
@@ -186,7 +215,7 @@ export const Transactions = () => {
           {currentData.length > 0 ? currentData.map(t => (
             <div key={t.id} className="bg-[var(--color-elevated)] border border-[var(--color-border-subtle)] p-4 rounded-xl flex flex-col gap-2 relative">
               <div className="flex justify-between items-start">
-                <span className="text-[12px] text-gray-500 font-medium">
+                <span className="text-[12px] text-[var(--color-text-secondary)] font-medium">
                   {new Date(t.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric'})}
                 </span>
                 <span className={`text-[15px] font-mono font-semibold ${t.type === 'income' ? 'text-[var(--color-teal)]' : 'text-[var(--color-text-primary)]'}`}>
@@ -204,7 +233,7 @@ export const Transactions = () => {
                 {role === 'Admin' && (
                   <div className="flex gap-2 min-h-[44px]">
                     <Button variant="ghost" size="icon" className="w-[44px] h-[44px]" onClick={() => openModal(t)}>
-                      <Edit2 className="w-[18px] h-[18px] text-gray-400" />
+                      <Edit2 className="w-[18px] h-[18px] text-[var(--color-text-secondary)]" />
                     </Button>
                     <Button variant="ghost" size="icon" className="w-[44px] h-[44px]" onClick={() => { if(window.confirm('Delete this?')) deleteTransaction(t.id); }}>
                       <Trash2 className="w-[18px] h-[18px] text-[var(--color-rose)]" />
@@ -214,7 +243,7 @@ export const Transactions = () => {
               </div>
             </div>
           )) : (
-            <div className="text-center py-10 text-gray-500 bg-[var(--color-elevated)] rounded-xl border border-[var(--color-border-subtle)]">
+            <div className="text-center py-10 text-[var(--color-text-secondary)] bg-[var(--color-elevated)] rounded-xl border border-[var(--color-border-subtle)]">
                 <p className="text-sm">No transactions found.</p>
             </div>
           )}
@@ -222,7 +251,7 @@ export const Transactions = () => {
 
         {pageCount > 1 && (
           <div className="flex items-center justify-between mt-6">
-            <span className="text-xs text-gray-500 font-medium">
+            <span className="text-xs text-[var(--color-text-secondary)] font-medium">
               Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, processedTransactions.length)} of {processedTransactions.length}
             </span>
             <div className="flex gap-2">

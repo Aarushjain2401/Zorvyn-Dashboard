@@ -17,7 +17,7 @@ export const Sidebar = ({ isExpanded, setIsExpanded }) => {
       {/* Toggle Button */}
       <button 
         onClick={() => setIsExpanded(!isExpanded)}
-        className="absolute -right-3 top-6 bg-[var(--color-surface)] border border-[var(--color-border-subtle)] rounded-full p-1 text-gray-400 hover:text-[var(--color-text-primary)] hover:border-[var(--color-text-primary)] transition-all z-50 shadow-sm"
+        className="absolute -right-3 top-6 bg-[var(--color-surface)] border border-[var(--color-border-subtle)] rounded-full p-1 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:border-[var(--color-text-primary)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-violet)] transition-all z-50 shadow-sm"
       >
         {isExpanded ? <ChevronLeft className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
       </button>
@@ -35,9 +35,9 @@ export const Sidebar = ({ isExpanded, setIsExpanded }) => {
             key={item.to}
             to={item.to}
             className={({ isActive }) => `
-              relative flex items-center h-11 rounded-none transition-all
+              relative flex items-center h-11 rounded-none transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--color-violet)]
               ${isExpanded ? 'px-3 justify-start' : 'w-11 justify-center mx-auto'}
-              ${isActive ? 'bg-[var(--color-violet)]/20 text-[var(--color-violet)] font-semibold' : 'text-gray-500 hover:text-[var(--color-text-primary)] hover:bg-[var(--color-elevated)] font-medium'}
+              ${isActive ? 'bg-[var(--color-violet)]/20 text-[var(--color-violet)] font-semibold' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-elevated)] font-medium'}
             `}
           >
             <item.icon className="w-[18px] h-[18px] shrink-0" strokeWidth={2.5} />

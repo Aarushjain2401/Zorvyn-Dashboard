@@ -16,7 +16,7 @@ export const Layout = () => {
   }, [location.pathname]);
 
   return (
-    <div className="flex h-screen bg-[var(--color-primary)] text-[var(--color-text-primary)] font-sans overflow-hidden">
+    <div className="flex min-h-[100dvh] bg-[var(--color-primary)] text-[var(--color-text-primary)] font-sans">
       {/* Ambient Mesh Background */}
       <div className="mesh-bg">
         <div className="mesh-blob-1"></div>
@@ -27,8 +27,8 @@ export const Layout = () => {
       <Topbar isExpanded={isSidebarExpanded} />
       
       {/* Scrollable Main Area */}
-      <main className={`flex-1 transition-all duration-300 ease-in-out mt-[56px] md:mt-[60px] pb-[70px] md:mb-[28px] md:pb-0 p-3 sm:p-6 lg:p-8 min-h-[calc(100vh-88px)] overflow-y-auto w-full ${isSidebarExpanded ? 'md:ml-[220px] md:w-[calc(100%-220px)]' : 'md:ml-[64px] md:w-[calc(100%-64px)]'}`}>
-        <div className="max-w-[1200px] w-full mx-auto">
+      <main className={`flex-1 transition-all duration-300 ease-in-out mt-[56px] md:mt-[60px] pb-[70px] md:mb-[28px] md:pb-0 p-3 sm:p-6 lg:p-8 w-full ${isSidebarExpanded ? 'md:ml-[220px] md:w-[calc(100%-220px)]' : 'md:ml-[64px] md:w-[calc(100%-64px)]'}`}>
+        <div className="max-w-[1600px] w-full mx-auto">
           <Outlet />
         </div>
       </main>

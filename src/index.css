@@ -1,13 +1,13 @@
 @import "tailwindcss";
 
 :root {
-  --app-primary: #EEF2F6;
-  --app-surface: #F8FAFC;
-  --app-elevated: #F8FAFC;
-  --app-popover: #F1F5F9;
-  --app-border-subtle: #CBD5E1;
-  --app-text-primary: #0F172A;
-  --app-text-secondary: #475569;
+  --app-primary: #E5E7EB; /* Tailwind gray-200 */
+  --app-surface: #F3F4F6; /* Tailwind gray-100 */
+  --app-elevated: #FFFFFF;
+  --app-popover: #F9FAFB; /* Tailwind gray-50 */
+  --app-border-subtle: #D1D5DB; /* Tailwind gray-300 */
+  --app-text-primary: #111827; /* Tailwind gray-900 */
+  --app-text-secondary: #6B7280; /* Tailwind gray-500 */
 }
 
 :root[data-theme='dark'] {
@@ -15,7 +15,7 @@
   --app-surface: #0A0D17;
   --app-elevated: #111626;
   --app-popover: #1C233B;
-  --app-border-subtle: #2A3655;
+  --app-border-subtle: #334155;
   --app-text-primary: #FFFFFF;
   --app-text-secondary: #94A3B8;
 }

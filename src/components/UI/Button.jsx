@@ -8,7 +8,7 @@ export const Button = React.forwardRef(({ children, className, variant = 'primar
     primary: "bg-[var(--color-violet)] text-white hover:bg-[#6A5AE6] focus:ring-[var(--color-violet)] shadow-[0_4px_14px_rgba(124,110,250,0.3)]",
     secondary: "bg-[var(--color-popover)] text-white border border-[var(--color-border-subtle)] hover:bg-[#1E2840] focus:ring-gray-600",
     danger: "bg-[var(--color-rose)] text-white hover:bg-[#E63950] focus:ring-[var(--color-rose)] shadow-[0_4px_14px_rgba(255,78,106,0.2)]",
-    ghost: "bg-transparent text-gray-400 hover:text-white hover:bg-[var(--color-popover)] focus:ring-gray-600",
+    ghost: "bg-transparent text-[var(--color-text-secondary)] hover:text-white hover:bg-[var(--color-popover)] focus:ring-gray-600",
   };
 
   const sizes = {

@@ -1,21 +1,68 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { useAppContext } from '../context/AppProvider';
 import { Card } from '../components/UI/Card';
-import { Badge } from '../components/UI/Badge';
+import { Link } from 'react-router-dom';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, Filler, ArcElement, LineController, BarController, DoughnutController } from 'chart.js';
 import { Line, Bar, Doughnut } from 'react-chartjs-2';
-import { ArrowUpRight, ArrowDownRight, Landmark, BadgePercent, TrendingUp, TrendingDown, Shield, Layers, Hourglass, Gauge, ChevronRight, Activity } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, Landmark, BadgePercent, TrendingUp, TrendingDown, Shield, Layers, Hourglass, Gauge, ChevronRight, Activity, Search, Download, Info } from 'lucide-react';
+
+const useInView = (options) => {
+  const [isInView, setIsInView] = useState(false);
+  const ref = useRef(null);
+  useEffect(() => {
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setIsInView(true);
+        observer.disconnect();
+      }
+    }, options);
+    const curr = ref.current;
+    if (curr) observer.observe(curr);
+    return () => { if (curr) observer.unobserve(curr); };
+  }, [options]);
+  return [ref, isInView];
+};
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Title, Tooltip, Legend, Filler, LineController, BarController, DoughnutController);
 ChartJS.defaults.color = '#8B949E';
 ChartJS.defaults.font.family = "'Geist', sans-serif";
 
 export const Overview = () => {
-  const { transactions, formatCurrency, openModal } = useAppContext();
+  const { transactions, globalMetrics, formatCurrency, formatCompactCurrency, openModal } = useAppContext();
   const [period, setPeriod] = useState('All');
   const [donutType, setDonutType] = useState('expense');
   const [txFilter, setTxFilter] = useState('All');
+  const [txSearchQuery, setTxSearchQuery] = useState('');
+  const [exportOpen, setExportOpen] = useState(false);
+  const [compareEnabled, setCompareEnabled] = useState(false);
   const filterCats = ['All', 'Income', 'Expense', 'Payroll', 'Marketing'];
+
+  // Simulation of loading states
+  const [isLoading, setIsLoading] = useState(true);
+  useEffect(() => {
+    const t = setTimeout(() => setIsLoading(false), 500);
+    return () => clearTimeout(t);
+  }, []);
+
+  // Lazy loading views
+  const [chartsRef, chartsInView] = useInView({ threshold: 0.1 });
+  const [bottomRef, bottomInView] = useInView({ threshold: 0.1 });
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      switch (e.key) {
+        case '1': setPeriod('1W'); break;
+        case '2': setPeriod('1M'); break;
+        case '3': setPeriod('6M'); break;
+        case '4': setPeriod('1Y'); break;
+        case '5': setPeriod('All'); break;
+        default: break;
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const metrics = useMemo(() => {
     const totalIncome = transactions.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0);
@@ -54,47 +101,90 @@ export const Overview = () => {
       balanceData.push(runningBalance);
     });
 
-    return {
-      labels,
-      datasets: [
-        {
-          type: 'line',
-          label: 'Cumulative Balance',
-          data: balanceData,
-          borderColor: '#6366F1',
-          borderWidth: 2.5,
-          tension: 0.1,
-          pointBackgroundColor: '#6366F1',
-          pointBorderColor: '#FFF',
-          pointBorderWidth: 1.5,
-          pointRadius: 0,
-          pointHoverRadius: 5,
-          fill: false,
-          yAxisID: 'y1',
-        },
-        {
-          type: 'bar',
-          label: 'Income',
-          data: incomeData,
-          backgroundColor: 'rgba(16, 185, 129, 0.5)',
-          borderColor: 'transparent',
-          borderWidth: 0,
-          borderRadius: 0,
-          yAxisID: 'y',
-        },
-        {
-          type: 'bar',
-          label: 'Expenses',
-          data: expenseData,
-          backgroundColor: 'rgba(244, 63, 94, 0.4)',
-          borderColor: 'transparent',
-          borderWidth: 0,
-          borderRadius: 0,
-          yAxisID: 'y',
-        }
-      ]
-    };
-  }, [transactions]);
+    const datasets = [
+      {
+        type: 'line',
+        label: 'Cumulative Balance',
+        data: balanceData,
+        borderColor: '#6366F1',
+        borderWidth: 2.5,
+        tension: 0.1,
+        pointBackgroundColor: '#6366F1',
+        pointBorderColor: '#FFF',
+        pointBorderWidth: 1.5,
+        pointRadius: 0,
+        pointHoverRadius: 5,
+        fill: false,
+        yAxisID: 'y1',
+      },
+      {
+        type: 'bar',
+        label: 'Income',
+        data: incomeData,
+        backgroundColor: 'rgba(16, 185, 129, 0.8)',
+        borderColor: 'transparent',
+        borderWidth: 0,
+        borderRadius: 4,
+        categoryPercentage: 0.8,
+        barPercentage: 0.9,
+        yAxisID: 'y',
+      },
+      {
+        type: 'bar',
+        label: 'Expenses',
+        data: expenseData,
+        backgroundColor: 'rgba(244, 63, 94, 0.7)',
+        borderColor: 'transparent',
+        borderWidth: 0,
+        borderRadius: 4,
+        categoryPercentage: 0.8,
+        barPercentage: 0.9,
+        yAxisID: 'y',
+      }
+    ];
+
+    if (compareEnabled) {
+      datasets.push({
+        type: 'line',
+        label: 'Prev. Balance',
+        data: balanceData.map(val => val * 0.75),
+        borderColor: 'rgba(99, 102, 241, 0.4)',
+        borderDash: [5, 5],
+        borderWidth: 2,
+        tension: 0.1,
+        pointRadius: 0,
+        fill: false,
+        yAxisID: 'y1',
+      });
+      datasets.push({
+        type: 'bar',
+        label: 'Prev. Income',
+        data: incomeData.map(val => val * 0.8),
+        backgroundColor: 'rgba(16, 185, 129, 0.2)',
+        borderColor: 'transparent',
+        borderWidth: 0,
+        borderRadius: 4,
+        categoryPercentage: 0.8,
+        barPercentage: 0.9,
+        yAxisID: 'y',
+      });
+      datasets.push({
+        type: 'bar',
+        label: 'Prev. Expenses',
+        data: expenseData.map(val => val * 0.85),
+        backgroundColor: 'rgba(244, 63, 94, 0.2)',
+        borderColor: 'transparent',
+        borderWidth: 0,
+        borderRadius: 4,
+        categoryPercentage: 0.8,
+        barPercentage: 0.9,
+        yAxisID: 'y',
+      });
+    }
+
+
+    return { labels, datasets };
+  }, [transactions, compareEnabled]);
 
   const comboOptions = {
     responsive: true,
@@ -118,7 +208,10 @@ export const Overview = () => {
           label: function(context) {
             let label = context.dataset.label || '';
             if (label) { label += ': '; }
-            if (context.parsed.y !== null) { label += formatCurrency(context.parsed.y); }
+            if (context.parsed.y !== null) { 
+              // Exact tooltip logic request
+              label += formatCurrency(context.parsed.y); 
+            }
             return label;
           }
         }
@@ -130,7 +223,7 @@ export const Overview = () => {
         type: 'linear', display: true, position: 'left', 
         grid: { color: 'rgba(148, 163, 184, 0.1)', drawBorder: false },
         border: { display: false },
-        ticks: { color: '#94A3B8', font: { size: 11 }, callback: function(value) { return formatCurrency(value); } }
+        ticks: { color: '#94A3B8', font: { size: 11 }, callback: function(value) { return formatCompactCurrency(value); } }
       },
       y1: { type: 'linear', display: false, position: 'right', grid: { drawOnChartArea: false } },
     }
@@ -138,17 +231,24 @@ export const Overview = () => {
 
   // Donut Chart Data
   const targetTransactions = transactions.filter(t => t.type === donutType);
-  const catTotals = Object.entries(targetTransactions.reduce((acc, t) => {
+  const baseExpenses = donutType === 'expense' ? { 'Infrastructure': 0, 'Payroll': 0, 'Marketing': 0, 'Office': 0, 'SaaS': 0, 'Consulting': 0 } : {};
+  const catTotalsRaw = targetTransactions.reduce((acc, t) => {
     acc[t.category] = (acc[t.category] || 0) + t.amount; return acc;
-  }, {})).sort((a,b) => b[1] - a[1]);
+  }, baseExpenses);
   
+  const catTotals = Object.entries(catTotalsRaw).sort((a,b) => b[1] - a[1]);
   const totalForDonut = targetTransactions.reduce((acc, t) => acc + t.amount, 0);
+
+  const CAT_COLORS = {
+    'Infrastructure': '#6366F1', 'Payroll': '#10B981', 'Marketing': '#F59E0B', 
+    'Office': '#D97706', 'SaaS': '#3B82F6', 'Consulting': '#059669', 'Revenue': '#10B981'
+  };
 
   const donutConfig = {
     labels: catTotals.map(c => c[0]),
     datasets: [{
       data: catTotals.map(c => c[1]),
-      backgroundColor: ['#6366F1', '#10B981', '#F59E0B', '#F43F5E', '#3B82F6', '#059669', '#D97706', '#E11D48'],
+      backgroundColor: catTotals.map(c => CAT_COLORS[c[0]] || '#F43F5E'),
       borderWidth: 0,
       cutout: '75%',
     }]
@@ -156,37 +256,70 @@ export const Overview = () => {
 
   const recentTx = [...transactions]
     .filter(t => {
-      if (txFilter === 'All') return true;
-      if (txFilter === 'Income') return t.type === 'income';
-      if (txFilter === 'Expense') return t.type === 'expense';
-      return t.category === txFilter;
+      if (txFilter !== 'All') {
+        if (txFilter === 'Income' && t.type !== 'income') return false;
+        if (txFilter === 'Expense' && t.type !== 'expense') return false;
+        if (txFilter !== 'Income' && txFilter !== 'Expense' && t.category !== txFilter) return false;
+      }
+      if (txSearchQuery) {
+        const q = txSearchQuery.toLowerCase();
+        if (!t.description.toLowerCase().includes(q) && !t.category.toLowerCase().includes(q)) return false;
+      }
+      return true;
     })
     .sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
 
   const KPICard = ({ title, value, badgeColor, icon: Icon, changeStr, isPositive, delay }) => {
     const sparkData = useMemo(() => Array.from({length: 10}, () => Math.random() * (isPositive ? 10 : 5) + (isPositive ? 8 : 4)), [isPositive]);
     const chartColor = badgeColor === 'violet' ? '#6366F1' : badgeColor === 'teal' ? '#10B981' : badgeColor === 'rose' ? '#F43F5E' : '#F59E0B';
-    const chartData = { labels: Array(10).fill(''), datasets: [{ data: sparkData, borderColor: chartColor, borderWidth: 1.5, pointRadius: 0, tension: 0.3 }] };
+    const chartBg = badgeColor === 'violet' ? 'rgba(99,102,241,0.15)' : badgeColor === 'teal' ? 'rgba(16,185,129,0.15)' : badgeColor === 'rose' ? 'rgba(244,63,94,0.15)' : 'rgba(245,158,11,0.15)';
+    const chartData = { labels: Array(10).fill(''), datasets: [{ data: sparkData, borderColor: chartColor, borderWidth: 1.5, backgroundColor: chartBg, fill: true, pointRadius: 0, tension: 0.1 }] };
     const chartOpts = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false }, y: { display: false } }, layout: { padding: 0 } };
 
     return (
       <Card className={`p-[14px] md:p-5 fade-in-up stagger-${delay} flex flex-col justify-between`}>
-        <div className="flex justify-between items-start mb-2">
-           <span className="text-[13px] md:text-sm font-medium text-[var(--color-text-secondary)] font-sans">{title}</span>
-           <div className="w-[38px] h-[38px] md:w-8 md:h-8 min-w-[38px] md:min-w-[32px] rounded-none flex items-center justify-center bg-[var(--color-popover)]">
-             <Icon className="w-4 h-4" style={{ color: `var(--color-${badgeColor})`}} />
-           </div>
-        </div>
-        <div className="text-[18px] md:text-[28px] font-mono tracking-tight text-[var(--color-text-primary)] mb-1">{value}</div>
-        <div className="flex justify-between items-end mt-1">
-           <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-none text-[10px] font-semibold bg-[var(--color-${isPositive ? 'teal' : 'rose'})]/10 text-[var(--color-${isPositive ? 'teal' : 'rose'})]`}>
-              {isPositive ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-              {changeStr}
-           </div>
-           <div className="w-20 h-8 opacity-80">
-             <Line data={chartData} options={chartOpts} />
-           </div>
-        </div>
+        {isLoading ? (
+          <div className="animate-pulse flex flex-col h-full justify-between">
+            <div className="flex justify-between items-start mb-2">
+              <div className="h-4 bg-[var(--color-border-subtle)] rounded w-24"></div>
+              <div className="w-[38px] h-[38px] md:w-8 md:h-8 bg-[var(--color-border-subtle)] rounded-none"></div>
+            </div>
+            <div className="h-8 bg-[var(--color-border-subtle)] rounded w-32 mb-1"></div>
+            <div className="flex justify-between items-end mt-1">
+              <div className="h-4 bg-[var(--color-border-subtle)] rounded w-16"></div>
+              <div className="h-8 bg-[var(--color-border-subtle)] rounded w-20"></div>
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="flex justify-between items-start mb-2 group relative">
+               <div className="flex items-center gap-1.5">
+                 <span className="text-sm md:text-[17px] font-semibold text-[var(--color-text-secondary)] brightness-110 font-sans">{title}</span>
+                 {title === "Savings Rate" && (
+                   <div className="relative group/tooltip flex items-center">
+                     <Info className="w-3.5 h-3.5 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] cursor-pointer" />
+                     <div className="absolute opacity-0 group-hover/tooltip:opacity-100 transition-opacity bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 bg-[var(--color-elevated)] border border-[var(--color-border-subtle)] p-2 rounded-lg text-[10px] text-[var(--color-text-secondary)] font-mono shadow-xl pointer-events-none z-50 text-center">
+                       ((Income - Expense) / Income) * 100
+                     </div>
+                   </div>
+                 )}
+               </div>
+               <div className="w-[38px] h-[38px] md:w-8 md:h-8 min-w-[38px] md:min-w-[32px] rounded-none flex items-center justify-center bg-[var(--color-popover)] shrink-0">
+                 <Icon className="w-4 h-4" style={{ color: `var(--color-${badgeColor})`}} />
+               </div>
+            </div>
+            <div className="text-[18px] md:text-[28px] font-mono tracking-tight text-[var(--color-text-primary)] mb-1">{value}</div>
+            <div className="flex justify-between items-end mt-1">
+               <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-none text-[10px] font-semibold bg-[var(--color-${isPositive ? 'teal' : 'rose'})]/10 text-[var(--color-${isPositive ? 'teal' : 'rose'})]`}>
+                  {isPositive ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                  {changeStr}
+               </div>
+               <div className="w-20 h-8 opacity-80">
+                 <Line data={chartData} options={chartOpts} />
+               </div>
+            </div>
+          </>
+        )}
       </Card>
     );
   };
@@ -197,15 +330,21 @@ export const Overview = () => {
       {/* Title & Period Selector */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 fade-in-up">
         <div>
-          <h1 className="text-[13px] md:text-2xl font-semibold text-[var(--color-text-primary)] tracking-tight">Overview</h1>
-          <p className="hidden md:block text-sm text-[var(--color-text-secondary)]">Consolidated ledger overview</p>
+          <h1 className="text-2xl md:text-4xl font-extrabold text-[var(--color-text-primary)] tracking-tight">Overview</h1>
+          <p className="hidden md:block text-sm text-[var(--color-text-secondary)] mt-2 font-medium">Consolidated ledger overview</p>
         </div>
         <div className="flex flex-col items-end gap-1.5">
-          <div className="flex items-center bg-[var(--color-elevated)] border border-[var(--color-border-subtle)] p-1 rounded-none overflow-x-auto whitespace-nowrap scrollbar-hide max-w-full">
-             {['1W', '1M', '6M', '1Y', 'All'].map(p => (
-               <button key={p} onClick={() => setPeriod(p)} className={`px-6 py-2 text-xs font-semibold rounded-none transition-all ${period === p ? 'bg-[var(--color-violet)] text-white shadow-sm' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-popover)]'}`}>
-                 {p}
-               </button>
+          <div className="flex items-center bg-[var(--color-elevated)] border border-[var(--color-border-subtle)] p-1.5 rounded-lg overflow-x-auto whitespace-nowrap scrollbar-hide max-w-full">
+             {['1W', '1M', '6M', '1Y', 'All'].map((p, idx) => (
+               <div key={p} className="relative group">
+                 <button 
+                    onClick={() => setPeriod(p)} 
+                    className={`px-5 py-2.5 text-[13px] font-semibold rounded-md transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--color-text-primary)] ${period === p ? 'bg-[var(--color-violet)] text-white shadow-sm' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-popover)]'}`}
+                 >
+                   {p}
+                 </button>
+                 <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 hidden group-hover:block bg-[var(--color-popover)] text-[10px] text-[var(--color-text-primary)] px-2 py-0.5 rounded shadow-[0_4px_16px_rgba(0,0,0,0.4)] border border-[var(--color-border-subtle)] pointer-events-none whitespace-nowrap z-50">Press {idx + 1}</div>
+               </div>
              ))}
           </div>
           <span className="text-[10px] text-[var(--color-text-secondary)] uppercase tracking-widest font-semibold pr-1">
@@ -225,9 +364,17 @@ export const Overview = () => {
       {/* Chart Row (1.7 : 1 ratio) */}
       <div className="flex flex-col lg:flex-row gap-5 max-w-full overflow-hidden">
          <Card className="flex-[1.7] p-4 md:p-5 fade-in-up stagger-4 flex flex-col h-[280px] md:h-[400px] overflow-hidden">
-           <div className="mb-4">
-             <h3 className="text-[13px] md:text-base font-semibold">Cash Flow</h3>
-             <span className="hidden md:block text-xs text-[var(--color-text-secondary)]">Income vs Expense overlaid with Net Balance</span>
+           <div className="flex justify-between items-center mb-4">
+             <div>
+               <h3 className="text-[13px] md:text-base font-semibold">Cash Flow</h3>
+               <span className="hidden md:block text-xs text-[var(--color-text-secondary)] mt-0.5">Income vs Expense overlaid with Net Balance</span>
+             </div>
+             <div className="flex items-center gap-2">
+               <span className="text-xs font-medium text-[var(--color-text-secondary)]">Compare</span>
+               <button onClick={() => setCompareEnabled(!compareEnabled)} className={`w-8 h-4 rounded-full transition-colors relative ${compareEnabled ? 'bg-[var(--color-violet)]' : 'bg-[var(--color-border-subtle)]'}`}>
+                 <span className={`absolute top-0.5 left-0.5 w-3 h-3 rounded-full bg-white transition-transform ${compareEnabled ? 'translate-x-4' : 'translate-x-0'}`}></span>
+               </button>
+             </div>
            </div>
            <div className="flex-1 min-h-[180px] md:min-h-[300px] flex items-center justify-center max-w-full overflow-hidden">
              {transactions.length > 0 ? <Bar data={comboChartData} options={comboOptions} /> : <span className="text-[var(--color-text-secondary)] text-sm font-sans tracking-tight">No data available</span>}
@@ -238,8 +385,8 @@ export const Overview = () => {
            <div className="flex justify-between items-center mb-4">
              <h3 className="text-[13px] md:text-base font-semibold">Distribution</h3>
              <div className="flex bg-[var(--color-primary)] border border-[var(--color-border-subtle)] rounded p-0.5 min-h-[44px] md:min-h-0 items-center">
-               <button onClick={() => setDonutType('expense')} className={`px-2 py-2 md:py-0.5 min-h-[36px] md:min-h-0 text-[10px] font-semibold rounded ${donutType === 'expense' ? 'bg-[var(--color-elevated)] text-[var(--color-text-primary)]' : 'text-[var(--color-text-secondary)]'}`}>Expense</button>
-               <button onClick={() => setDonutType('income')} className={`px-2 py-2 md:py-0.5 min-h-[36px] md:min-h-0 text-[10px] font-semibold rounded ${donutType === 'income' ? 'bg-[var(--color-elevated)] text-[var(--color-text-primary)]' : 'text-[var(--color-text-secondary)]'}`}>Income</button>
+               <button onClick={() => setDonutType('expense')} className={`px-3 py-2 md:py-0.5 min-h-[36px] md:min-h-0 text-[10px] font-semibold rounded transition-colors ${donutType === 'expense' ? 'bg-[var(--color-rose)] text-white' : 'text-[var(--color-text-secondary)] opacity-50 hover:opacity-100 hover:text-[var(--color-text-primary)]'}`}>Expense</button>
+               <button onClick={() => setDonutType('income')} className={`px-3 py-2 md:py-0.5 min-h-[36px] md:min-h-0 text-[10px] font-semibold rounded transition-colors ${donutType === 'income' ? 'bg-[var(--color-teal)] text-white' : 'text-[var(--color-text-secondary)] opacity-50 hover:opacity-100 hover:text-[var(--color-text-primary)]'}`}>Income</button>
              </div>
            </div>
            <div className="relative w-[140px] h-[140px] md:max-w-[180px] md:w-full md:aspect-square md:h-auto mx-auto mb-6 flex items-center justify-center">
@@ -276,13 +423,27 @@ export const Overview = () => {
       {/* Bottom Row (1 : 1.6 ratio) */}
       <div className="flex flex-col lg:flex-row gap-5 pb-5">
          <Card className="flex-[1] p-5 fade-in-up stagger-5">
-           <div className="flex items-center justify-between mb-3">
+           <div className="flex items-center justify-between mb-3 relative">
              <h3 className="text-base font-semibold">Recent Transactions</h3>
-             <button className="text-xs text-[var(--color-brand)] hover:text-[var(--color-text-primary)] transition-colors">View All</button>
+             <div className="flex items-center gap-3">
+               <div className="relative">
+                 <button onClick={() => setExportOpen(!exportOpen)} className="text-xs flex items-center gap-1 font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors">
+                   <Download className="w-3.5 h-3.5" /> Export
+                 </button>
+                 {exportOpen && (
+                   <div className="absolute right-0 top-full mt-2 w-32 bg-[var(--color-elevated)] border border-[var(--color-border-subtle)] shadow-xl z-50">
+                     <button className="w-full text-left px-3 py-2 text-[10px] font-medium text-[var(--color-text-secondary)] hover:bg-[var(--color-popover)] hover:text-[var(--color-text-primary)] transition-colors" onClick={() => setExportOpen(false)}>Export as CSV</button>
+                     <button className="w-full text-left px-3 py-2 text-[10px] font-medium text-[var(--color-text-secondary)] hover:bg-[var(--color-popover)] hover:text-[var(--color-text-primary)] transition-colors border-t border-[var(--color-border-subtle)]" onClick={() => setExportOpen(false)}>Export as PDF</button>
+                   </div>
+                 )}
+               </div>
+               <button className="text-xs font-medium text-[var(--color-brand)] hover:text-[var(--color-text-primary)] transition-colors">View All</button>
+             </div>
            </div>
            
-           {/* Filters */}
-           <div className="flex items-center gap-2 mb-4 overflow-x-auto scrollbar-hide pb-2 border-b border-[var(--color-border-subtle)]">
+           {/* Filters & Search */}
+           <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4 pb-2 border-b border-[var(--color-border-subtle)]">
+             <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
              {filterCats.map(cat => (
                <button 
                  key={cat} 
@@ -298,8 +459,20 @@ export const Overview = () => {
                  {cat}
                </button>
              ))}
+             </div>
+             
+             <div className="relative shrink-0">
+               <Search className="w-3.5 h-3.5 absolute left-2 top-1/2 -translate-y-1/2 text-[var(--color-text-secondary)]" />
+               <input 
+                 type="text" 
+                 placeholder="Search" 
+                 value={txSearchQuery}
+                 onChange={(e) => setTxSearchQuery(e.target.value)}
+                 className="w-full md:w-[140px] pl-7 pr-3 py-1.5 bg-[var(--color-popover)] border border-[var(--color-border-subtle)] text-xs text-[var(--color-text-primary)] placeholder-[var(--color-text-secondary)] focus:outline-none focus:border-[var(--color-violet)] transition-colors"
+               />
+             </div>
            </div>
-           <div className="space-y-4">
+           <div className="space-y-4 overflow-y-auto max-h-[300px] pr-2 scrollbar-thin">
              {recentTx.map((t, index) => (
                <div key={t.id} className={`flex justify-between items-center bg-[var(--color-popover)]/50 py-[8px] px-0 md:p-2.5 md:rounded-none border-b md:border md:border-[var(--color-border-subtle)] border-gray-800 ${index === 4 ? 'hidden md:flex' : ''}`}>
                  <div className="flex items-center gap-3">
@@ -312,31 +485,45 @@ export const Overview = () => {
                    </div>
                  </div>
                  <div className="flex flex-col items-end">
-                   <span className={`text-xs font-mono font-medium ${t.type === 'income' ? 'text-[var(--color-teal)]' : 'text-[var(--color-text-primary)]'}`}>
-                     {t.type === 'income' ? '+' : '-'}{formatCurrency(t.amount)}
-                   </span>
-                   <span className="text-[10px] text-[var(--color-text-secondary)]">{new Date(t.date).toLocaleDateString(undefined, {month:'short', day:'numeric'})}</span>
+                   <div className="flex items-center gap-1.5 flex-row-reverse md:flex-row">
+                     {t.type === 'income' ? <ArrowUpRight className="w-3 h-3 text-[var(--color-teal)]" /> : <ArrowDownRight className="w-3 h-3 text-[var(--color-rose)]" />}
+                     <span className={`text-xs font-mono font-medium ${t.type === 'income' ? 'text-[var(--color-teal)]' : 'text-[var(--color-rose)]'}`}>
+                       {t.type === 'income' ? '+' : '-'}{formatCurrency(t.amount)}
+                     </span>
+                   </div>
+                   <span className="text-[10px] text-[var(--color-text-secondary)] mt-1">{new Date(t.date).toLocaleDateString(undefined, {month:'short', day:'numeric'})}</span>
                  </div>
                </div>
              ))}
            </div>
          </Card>
 
-         <div className="flex-[1.6] grid grid-cols-1 md:grid-cols-3 gap-5 fade-in-up stagger-5">
-            {[
-              { icon: Gauge, label: "Burn Rate", value: formatCurrency(metrics.totalExpense / 6), desc: "Average trailing 6 months", c: 'rose' },
-              { icon: Layers, label: "Total Assets", value: "32", desc: "Active monitored accounts", c: 'teal' },
-              { icon: Hourglass, label: "Runway", value: "24.5", desc: "Months at current burn", c: 'amber' },
-            ].map((insight, idx) => (
-              <Card key={idx} className="py-[20px] px-[16px] md:p-6 flex flex-col items-center text-center justify-center group cursor-pointer hover:bg-[var(--color-popover)] min-h-[140px] border-b-2" style={{ borderBottomColor: `var(--color-${insight.c})` }}>
-                <div className={`w-12 h-12 mb-3 rounded-none bg-[var(--color-${insight.c})]/10 flex items-center justify-center text-[var(--color-${insight.c})] shrink-0`}>
-                   <insight.icon className="w-5 h-5" />
-                </div>
-                <div className="text-[11px] font-semibold text-[var(--color-text-secondary)] mb-1 uppercase tracking-widest">{insight.label}</div>
-                <div className="text-3xl font-mono font-medium text-[var(--color-text-primary)] mb-2 mt-1">{insight.value}</div>
-                <div className="text-[10px] text-[var(--color-text-secondary)] font-medium uppercase tracking-wider">{insight.desc}</div>
-              </Card>
-            ))}
+         <div className="flex-[1.6] grid grid-cols-1 md:grid-cols-3 gap-5 fade-in-up stagger-5" ref={bottomRef}>
+            {isLoading || !bottomInView ? (
+              Array.from({length: 3}).map((_, idx) => (
+                <Card key={idx} className="py-[20px] px-[16px] md:p-6 flex flex-col items-center justify-center min-h-[140px] animate-pulse">
+                  <div className="w-8 h-8 bg-[var(--color-border-subtle)] rounded-full mb-3"></div>
+                  <div className="w-16 h-3 bg-[var(--color-border-subtle)] rounded mb-4"></div>
+                  <div className="w-24 h-8 bg-[var(--color-border-subtle)] rounded mb-2"></div>
+                  <div className="w-32 h-2 bg-[var(--color-border-subtle)] rounded mt-2"></div>
+                </Card>
+              ))
+            ) : (
+              [
+                { icon: Gauge, label: "Burn Rate", value: formatCurrency(globalMetrics.burnRate), desc: "Average trailing 6 months", c: 'rose' },
+                { icon: Layers, label: "Total Assets", value: "32", desc: "Active monitored accounts", c: 'teal' },
+                { icon: Hourglass, label: "Runway", value: `${globalMetrics.runway} Months`, desc: "Months at current burn", c: 'amber' },
+              ].map((insight, idx) => (
+                <Card key={idx} className="relative py-6 px-4 md:p-6 flex flex-col items-center justify-center text-center group min-h-[140px] border-t-2" style={{ borderTopColor: `var(--color-${insight.c})` }}>
+                  <div className={`w-8 h-8 mb-3 rounded-full bg-[var(--color-${insight.c})]/10 flex items-center justify-center text-[var(--color-${insight.c})] shrink-0`}>
+                     <insight.icon className="w-4 h-4" />
+                  </div>
+                  <div className="text-[11px] font-semibold text-[var(--color-text-secondary)] uppercase tracking-widest mb-1">{insight.label}</div>
+                  <div className="text-2xl md:text-3xl font-mono font-medium text-[var(--color-text-primary)] mb-2">{insight.value}</div>
+                  <div className="text-[9px] md:text-[10px] text-[var(--color-text-secondary)] font-medium uppercase tracking-wider">{insight.desc}</div>
+                </Card>
+              ))
+            )}
          </div>
       </div>
     </div>

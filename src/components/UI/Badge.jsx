@@ -3,7 +3,7 @@ import { cn } from './Card';
 
 export const Badge = ({ children, variant = 'neutral', className, ...props }) => {
   const variants = {
-    neutral: 'bg-[var(--color-popover)] text-gray-400 border border-[var(--color-border-subtle)]',
+    neutral: 'bg-[var(--color-popover)] text-[var(--color-text-secondary)] border border-[var(--color-border-subtle)]',
     income: 'bg-[var(--color-teal)]/10 text-[var(--color-teal)] border border-[var(--color-teal)]/20',
     expense: 'bg-[var(--color-rose)]/10 text-[var(--color-rose)] border border-[var(--color-rose)]/20',
     warning: 'bg-[var(--color-amber)]/10 text-[var(--color-amber)] border border-[var(--color-amber)]/20',

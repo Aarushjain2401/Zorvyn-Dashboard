@@ -108,8 +108,8 @@ export const Insights = () => {
                  return (
                    <div key={cat} className="text-sm">
                      <div className="flex justify-between mb-2">
-                       <span className="text-gray-300 font-medium">{cat}</span>
-                       <span className="font-mono text-gray-400">{formatCurrency(amt)} <span className="text-[10px] ml-1">({pct.toFixed(1)}%)</span></span>
+                       <span className="text-[var(--color-text-secondary)] font-medium">{cat}</span>
+                       <span className="font-mono text-[var(--color-text-secondary)]">{formatCurrency(amt)} <span className="text-[10px] ml-1">({pct.toFixed(1)}%)</span></span>
                      </div>
                      <div className="w-full h-1.5 bg-[var(--color-elevated)] border border-[var(--color-border-subtle)] rounded-full overflow-hidden">
                        <div className="h-full bg-[var(--color-rose)] rounded-full" style={{ width: `${pct}%` }}></div>
