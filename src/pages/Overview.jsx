@@ -14,6 +14,8 @@ export const Overview = () => {
   const { transactions, formatCurrency, openModal } = useAppContext();
   const [period, setPeriod] = useState('All');
   const [donutType, setDonutType] = useState('expense');
+  const [txFilter, setTxFilter] = useState('All');
+  const filterCats = ['All', 'Income', 'Expense', 'Payroll', 'Marketing'];
 
   const metrics = useMemo(() => {
     const totalIncome = transactions.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0);
@@ -152,23 +154,42 @@ export const Overview = () => {
     }]
   };
 
-  const recentTx = [...transactions].sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
+  const recentTx = [...transactions]
+    .filter(t => {
+      if (txFilter === 'All') return true;
+      if (txFilter === 'Income') return t.type === 'income';
+      if (txFilter === 'Expense') return t.type === 'expense';
+      return t.category === txFilter;
+    })
+    .sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
 
-  const KPICard = ({ title, value, badgeColor, icon: Icon, changeStr, isPositive, delay }) => (
-    <Card className={`p-[14px] md:p-5 fade-in-up stagger-${delay}`}>
-      <div className="flex justify-between items-start mb-2">
-         <span className="text-[13px] md:text-sm font-medium text-[var(--color-text-secondary)] font-sans">{title}</span>
-         <div className="w-[38px] h-[38px] md:w-8 md:h-8 min-w-[38px] md:min-w-[32px] rounded-none flex items-center justify-center bg-[var(--color-popover)]">
-           <Icon className="w-4 h-4" style={{ color: `var(--color-${badgeColor})`}} />
-         </div>
-      </div>
-      <div className="text-[18px] md:text-[28px] font-mono tracking-tight text-[var(--color-text-primary)] mb-2">{value}</div>
-      <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-none text-[10px] font-semibold bg-[var(--color-${isPositive ? 'teal' : 'rose'})]/10 text-[var(--color-${isPositive ? 'teal' : 'rose'})]`}>
-         {isPositive ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-         {changeStr} vs last
-      </div>
-    </Card>
-  );
+  const KPICard = ({ title, value, badgeColor, icon: Icon, changeStr, isPositive, delay }) => {
+    const sparkData = useMemo(() => Array.from({length: 10}, () => Math.random() * (isPositive ? 10 : 5) + (isPositive ? 8 : 4)), [isPositive]);
+    const chartColor = badgeColor === 'violet' ? '#6366F1' : badgeColor === 'teal' ? '#10B981' : badgeColor === 'rose' ? '#F43F5E' : '#F59E0B';
+    const chartData = { labels: Array(10).fill(''), datasets: [{ data: sparkData, borderColor: chartColor, borderWidth: 1.5, pointRadius: 0, tension: 0.3 }] };
+    const chartOpts = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false }, y: { display: false } }, layout: { padding: 0 } };
+
+    return (
+      <Card className={`p-[14px] md:p-5 fade-in-up stagger-${delay} flex flex-col justify-between`}>
+        <div className="flex justify-between items-start mb-2">
+           <span className="text-[13px] md:text-sm font-medium text-[var(--color-text-secondary)] font-sans">{title}</span>
+           <div className="w-[38px] h-[38px] md:w-8 md:h-8 min-w-[38px] md:min-w-[32px] rounded-none flex items-center justify-center bg-[var(--color-popover)]">
+             <Icon className="w-4 h-4" style={{ color: `var(--color-${badgeColor})`}} />
+           </div>
+        </div>
+        <div className="text-[18px] md:text-[28px] font-mono tracking-tight text-[var(--color-text-primary)] mb-1">{value}</div>
+        <div className="flex justify-between items-end mt-1">
+           <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-none text-[10px] font-semibold bg-[var(--color-${isPositive ? 'teal' : 'rose'})]/10 text-[var(--color-${isPositive ? 'teal' : 'rose'})]`}>
+              {isPositive ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+              {changeStr}
+           </div>
+           <div className="w-20 h-8 opacity-80">
+             <Line data={chartData} options={chartOpts} />
+           </div>
+        </div>
+      </Card>
+    );
+  };
 
   return (
     <div className="space-y-6">
@@ -179,12 +200,17 @@ export const Overview = () => {
           <h1 className="text-[13px] md:text-2xl font-semibold text-[var(--color-text-primary)] tracking-tight">Overview</h1>
           <p className="hidden md:block text-sm text-[var(--color-text-secondary)]">Consolidated ledger overview</p>
         </div>
-        <div className="flex items-center bg-[var(--color-elevated)] border border-[var(--color-border-subtle)] p-1 rounded-none overflow-x-auto whitespace-nowrap scrollbar-hide max-w-full">
-           {['1W', '1M', '6M', '1Y', 'All'].map(p => (
-             <button key={p} onClick={() => setPeriod(p)} className={`px-4 py-1.5 min-h-[44px] min-w-[44px] md:min-h-0 md:min-w-0 text-xs font-medium rounded-none transition-all ${period === p ? 'bg-[var(--color-popover)] text-[var(--color-text-primary)] shadow-sm' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'}`}>
-               {p}
-             </button>
-           ))}
+        <div className="flex flex-col items-end gap-1.5">
+          <div className="flex items-center bg-[var(--color-elevated)] border border-[var(--color-border-subtle)] p-1 rounded-none overflow-x-auto whitespace-nowrap scrollbar-hide max-w-full">
+             {['1W', '1M', '6M', '1Y', 'All'].map(p => (
+               <button key={p} onClick={() => setPeriod(p)} className={`px-6 py-2 text-xs font-semibold rounded-none transition-all ${period === p ? 'bg-[var(--color-violet)] text-white shadow-sm' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-popover)]'}`}>
+                 {p}
+               </button>
+             ))}
+          </div>
+          <span className="text-[10px] text-[var(--color-text-secondary)] uppercase tracking-widest font-semibold pr-1">
+             {period === '1W' ? 'Mar 24 — Mar 31 2026' : period === '1M' ? 'Mar 2026' : period === '6M' ? 'Oct 2025 — Mar 2026' : period === '1Y' ? 'Apr 2025 — Mar 2026' : 'Lifetime Tracking'}
+          </span>
         </div>
       </div>
 
@@ -250,9 +276,28 @@ export const Overview = () => {
       {/* Bottom Row (1 : 1.6 ratio) */}
       <div className="flex flex-col lg:flex-row gap-5 pb-5">
          <Card className="flex-[1] p-5 fade-in-up stagger-5">
-           <div className="flex items-center justify-between mb-4">
+           <div className="flex items-center justify-between mb-3">
              <h3 className="text-base font-semibold">Recent Transactions</h3>
              <button className="text-xs text-[var(--color-brand)] hover:text-[var(--color-text-primary)] transition-colors">View All</button>
+           </div>
+           
+           {/* Filters */}
+           <div className="flex items-center gap-2 mb-4 overflow-x-auto scrollbar-hide pb-2 border-b border-[var(--color-border-subtle)]">
+             {filterCats.map(cat => (
+               <button 
+                 key={cat} 
+                 onClick={() => setTxFilter(cat)}
+                 className={`px-3 py-1.5 text-[10px] font-semibold border rounded-none uppercase tracking-wider transition-colors shrink-0 
+                   ${cat === 'All' && txFilter === 'All' ? 'bg-[var(--color-text-primary)] text-[var(--color-surface)] border-[var(--color-text-primary)]' : 
+                   cat === 'Income' && txFilter === 'Income' ? 'bg-[var(--color-teal)] text-[#0F172A] border-[var(--color-teal)]' :
+                   cat === 'Expense' && txFilter === 'Expense' ? 'bg-[var(--color-rose)] text-[#0F172A] border-[var(--color-rose)]' :
+                   cat === 'Payroll' && txFilter === 'Payroll' ? 'bg-[var(--color-violet)] text-white border-[var(--color-violet)]' :
+                   txFilter === cat ? 'bg-[var(--color-text-primary)] text-[var(--color-surface)] border-[var(--color-text-primary)]' :
+                   'bg-transparent text-[var(--color-text-secondary)] border-[var(--color-border-subtle)] hover:border-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-popover)]'}`}
+               >
+                 {cat}
+               </button>
+             ))}
            </div>
            <div className="space-y-4">
              {recentTx.map((t, index) => (
@@ -283,20 +328,13 @@ export const Overview = () => {
               { icon: Layers, label: "Total Assets", value: "32", desc: "Active monitored accounts", c: 'teal' },
               { icon: Hourglass, label: "Runway", value: "24.5", desc: "Months at current burn", c: 'amber' },
             ].map((insight, idx) => (
-              <Card key={idx} className="py-[12px] px-[14px] md:p-5 flex flex-col justify-between group cursor-pointer hover:bg-[var(--color-popover)] min-h-[100px]">
-                <div className="flex justify-between items-start mb-3 md:mb-4">
-                  <div className={`flex items-center gap-2 text-sm font-medium text-[var(--color-${insight.c})]`}>
-                    <div className={`w-7 h-7 rounded-none bg-[var(--color-${insight.c})]/10 flex items-center justify-center`}>
-                       <insight.icon className="w-4 h-4" />
-                    </div>
-                    {insight.label}
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-[var(--color-text-secondary)] group-hover:text-[var(--color-text-primary)] transition-colors" />
+              <Card key={idx} className="py-[20px] px-[16px] md:p-6 flex flex-col items-center text-center justify-center group cursor-pointer hover:bg-[var(--color-popover)] min-h-[140px] border-b-2" style={{ borderBottomColor: `var(--color-${insight.c})` }}>
+                <div className={`w-12 h-12 mb-3 rounded-none bg-[var(--color-${insight.c})]/10 flex items-center justify-center text-[var(--color-${insight.c})] shrink-0`}>
+                   <insight.icon className="w-5 h-5" />
                 </div>
-                <div>
-                  <div className="text-2xl font-mono text-[var(--color-text-primary)] mb-1">{insight.value}</div>
-                  <div className="text-[11px] text-[var(--color-text-secondary)]">{insight.desc}</div>
-                </div>
+                <div className="text-[11px] font-semibold text-[var(--color-text-secondary)] mb-1 uppercase tracking-widest">{insight.label}</div>
+                <div className="text-3xl font-mono font-medium text-[var(--color-text-primary)] mb-2 mt-1">{insight.value}</div>
+                <div className="text-[10px] text-[var(--color-text-secondary)] font-medium uppercase tracking-wider">{insight.desc}</div>
               </Card>
             ))}
          </div>
